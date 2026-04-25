@@ -659,7 +659,7 @@ def is_high_value(article: dict) -> bool:
     return bool(article.get("title", "").strip())
 
 # ── LOCAL IMAGE SYSTEM ───────────────────────────────────────────────────────
-# ALL images served from docs/assets/ — no Unsplash, no external URLs.
+# ALL images served from docs/assets/. NO Unsplash, NO external URLs.
 # assign_images.py populates image fields. build.py resolves from local disk.
 
 _RESERVED_ASSETS = {
@@ -697,14 +697,18 @@ def _local_image_exists(url: str) -> bool:
 
 
 def _scan_local_images() -> list:
-    """Return sorted list of /assets/filename.ext for every usable image in docs/assets/.
-    Called once at build time — reflects what is actually on disk."""
+    """Return list of /assets/filename.ext for every usable image in docs/assets/.
+    Reflects what's actually on disk at build time."""
     found = []
     try:
         for fn in sorted(os.listdir(os.path.join(DOCS, "assets"))):
             if not fn.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
                 continue
             if fn in _RESERVED_ASSETS:
+                continue
+            # Skip uppercase originals if a sanitized lowercase copy exists
+            sanitized = fn.lower().replace(" ", "-").replace("(", "").replace(")", "")
+            if fn != sanitized and os.path.isfile(os.path.join(DOCS, "assets", sanitized)):
                 continue
             found.append(f"/assets/{fn}")
     except Exception:
@@ -716,19 +720,16 @@ def _best_local_image_for(a: dict, pool: list, used: set) -> str:
     """Pick the best unused local image for an article.
     Priority: category-default → round-robin from pool → fallback.jpg"""
     cat = (a.get("category") or "featured").lower()
-    # Try category-preferred image
     pref = _CAT_IMAGE.get(cat)
     if pref:
         pref_url = f"/assets/{pref}"
         if _local_image_exists(pref_url) and pref_url not in used:
             used.add(pref_url)
             return pref_url
-    # Round-robin through pool
     for img in pool:
         if img not in used:
             used.add(img)
             return img
-    # Pool exhausted — reset used set and start again
     used.clear()
     if pool:
         used.add(pool[0])
@@ -736,7 +737,7 @@ def _best_local_image_for(a: dict, pool: list, used: set) -> str:
     return "/assets/fallback.jpg"
 
 
-# Backward-compat stubs (referenced by legacy code paths, safe to keep)
+# Backward-compat stubs (legacy code paths reference these — safe to keep)
 def _unsplash_url(photo_id):
     return "/assets/fallback.jpg"
 
@@ -746,7 +747,8 @@ def _is_bad_image(url):
     return url.startswith("http://") or url.startswith("https://")
 
 def _image_is_from_pool(url: str) -> bool:
-    return False   # Unsplash pool is retired
+    return False   # Unsplash pool is retired — local images only
+
 
 def _fix_article_images(arts):
     """Resolve final image_url for every article — LOCAL IMAGES ONLY.
@@ -754,21 +756,18 @@ def _fix_article_images(arts):
     No Unsplash. No external URLs. Every card shows a file from docs/assets/.
 
     Priority per article:
-      1. Manual article (_source=="manual"): image_url already confirmed on
-         disk by load_manual_articles(). Preserve as-is, set credits.
-      2. Generated article: existing image_url if it is a local /assets/ path
-         that exists on disk AND is not the broken _fallback stub.
-      3. Generated article: "image" field if it is a local /assets/ path that
-         exists on disk AND is not the broken _fallback stub.
-      4. Assign from local pool: category-preferred image, then round-robin
-         through all available docs/assets/ images.
-      5. Hard fallback: /assets/fallback.jpg (always present).
+      1. Manual article (_source=="manual"): preserve image_url already
+         confirmed on disk by load_manual_articles().
+      2. Existing image_url if it is a local /assets/ path that exists on disk
+         (and is not the broken /assets/images/_fallback/streamic-default.jpg).
+      3. The "image" field if it is a local /assets/ path that exists on disk
+         (and is not the broken _fallback stub).
+      4. Assign from local pool: category-preferred, then round-robin.
+      5. Hard fallback: /assets/fallback.jpg.
 
-    Result: every article.image_url is guaranteed to be a local /assets/ path.
+    After processing, every article.image_url is guaranteed to be a local path.
     """
     BROKEN = "/assets/images/_fallback/streamic-default.jpg"
-
-    # Scan disk once — reflects exactly what's uploaded to the repo
     pool = _scan_local_images()
     used: set = set()
 
@@ -776,7 +775,7 @@ def _fix_article_images(arts):
     fallback_used  = 0
 
     for a in arts:
-        # ── PRIORITY 1: manual article — already resolved ──────────────
+        # PRIORITY 1: manual article — already resolved
         if a.get("_source") == "manual":
             a.setdefault("image_credit",     "The Streamic")
             a.setdefault("image_license",    "Site Asset")
@@ -786,7 +785,7 @@ def _fix_article_images(arts):
                 used.add(img)
             continue
 
-        # ── PRIORITY 2: existing image_url if valid local file ─────────
+        # PRIORITY 2: existing image_url if valid local file
         img_url = (a.get("image_url") or "").strip()
         if (img_url
                 and img_url != BROKEN
@@ -800,7 +799,7 @@ def _fix_article_images(arts):
             used.add(a["image_url"])
             continue
 
-        # ── PRIORITY 3: "image" field if valid local file ──────────────
+        # PRIORITY 3: "image" field if valid local file
         img_field = (a.get("image") or "").strip()
         if (img_field
                 and img_field != BROKEN
@@ -814,8 +813,8 @@ def _fix_article_images(arts):
             used.add(a["image_url"])
             continue
 
-        # ── PRIORITY 4: assign from local pool ────────────────────────
-        if pool:
+        # PRIORITY 4: assign from local pool
+        if pool and pool != ["/assets/fallback.jpg"]:
             chosen = _best_local_image_for(a, pool, used)
             a["image_url"]         = chosen
             a["image_credit"]      = "The Streamic"
@@ -824,7 +823,7 @@ def _fix_article_images(arts):
             local_assigned += 1
             continue
 
-        # ── PRIORITY 5: hard fallback ──────────────────────────────────
+        # PRIORITY 5: hard fallback
         a["image_url"]         = "/assets/fallback.jpg"
         a["image_credit"]      = "The Streamic"
         a["image_license"]     = "Site Asset"
@@ -834,27 +833,25 @@ def _fix_article_images(arts):
     if local_assigned:
         print(f"  Image fixer: {local_assigned} articles assigned local images from pool")
     if fallback_used:
-        print(f"  Image fixer: {fallback_used} articles using fallback.jpg (pool empty)")
-    # Confirm: no external URLs remain
+        print(f"  Image fixer: {fallback_used} articles using fallback.jpg")
     ext = [a.get("image_url","") for a in arts if (a.get("image_url","") or "").startswith("http")]
     if ext:
-        print(f"  ⚠ WARNING: {len(ext)} articles still have external image_url — check data")
+        print(f"  ⚠ WARNING: {len(ext)} articles still have external image_url")
 
 
 def _hp_img(a, base=""):
+    """Resolve a card image URL — LOCAL ONLY, no external URLs."""
     img = (a.get("image_url", "") or a.get("image", "") or "").strip()
-    # Only use confirmed local /assets/ paths — never external URLs
     if img and not img.startswith("http") and (img.startswith("/assets/") or img.startswith("assets/")):
         if _local_image_exists(img):
-            return img.lstrip("/") if base else img
-    # Per-category local fallback
+            return img if img.startswith("/") else "/" + img
     cat = (a.get("category") or "featured").lower()
     pref = _CAT_IMAGE.get(cat, "the-streamic-studio-1.png")
     pref_url = f"/assets/{pref}"
     if _local_image_exists(pref_url):
         return pref_url
-    # Ultimate fallback
     return "/assets/fallback.jpg"
+
 
 def _hp_tag(a):
     cinfo = CAT.get(a.get("category", "featured"), CAT["featured"])
@@ -2978,21 +2975,10 @@ def sitemap(arts):
     return "\n".join(lines)
 
 # ── MAIN
-# ── MANUAL ARTICLES LOADER ───────────────────────────────────────────────────
-# Reads data/manual_articles.json and converts each published entry into an
-# article dict that is fully compatible with the existing build.py pipeline.
-# Rules:
-#   - Only entries with status == "published" are loaded.
-#   - docs/articles/{slug}.html must exist or the entry is skipped (warning printed).
-#   - If the HTML starts with <!-- HAND_AUTHORED --> it is NEVER overwritten.
-#   - image_url is set from "image" field. Must start with /assets/ or assets/
-#     so _fix_article_images() preserves it. Falls back to /assets/fallback.jpg.
-#   - Slugs already present in generated_articles.json are skipped (no duplicates).
-
 def load_manual_articles():
     """Return list of article dicts from data/manual_articles.json.
 
-    Manual articles always override generated_articles.json on slug collision.
+    Manual articles override generated_articles.json on slug collision.
     Image resolution priority:
       1. entry["image"] if file exists on disk under docs/
       2. /assets/fallback.jpg
@@ -3022,7 +3008,6 @@ def load_manual_articles():
             skipped += 1
             continue
 
-        # Article HTML must exist in docs/articles/
         html_path = os.path.join(ARTS_D, f"{slug}.html")
         if not os.path.isfile(html_path):
             print(f"  ⚠ manual '{slug}': docs/articles/{slug}.html not found — skipped")
@@ -3034,9 +3019,7 @@ def load_manual_articles():
         category = (entry.get("category") or "ai-post-production").strip()
         desc     = (entry.get("description") or "").strip()
 
-        # ── Image resolution (manual articles) ───────────────────────────
-        # Priority 1: "image" field if local /assets/ file exists on disk.
-        # Priority 2: /assets/fallback.jpg (always present).
+        # Image resolution: file on disk, or /assets/fallback.jpg
         raw_img = (entry.get("image") or "").strip()
         if raw_img and not raw_img.startswith("/"):
             raw_img = "/" + raw_img
@@ -3044,7 +3027,7 @@ def load_manual_articles():
         if raw_img:
             img_disk = os.path.join(DOCS, raw_img.lstrip("/"))
             if os.path.isfile(img_disk):
-                img = raw_img          # confirmed on disk
+                img = raw_img
             else:
                 print(f"  ⚠ manual '{slug}': image {raw_img!r} not found on disk — using fallback")
         if not img:
@@ -3070,7 +3053,7 @@ def load_manual_articles():
             "source_domain":     "The Streamic",
             "quality_score":     90,
             "body_html":         f"<p>{desc}</p>" if desc else "",
-            "_source":           "manual",   # build-log tag — not rendered
+            "_source":           "manual",
         })
 
     if results:
@@ -3181,32 +3164,19 @@ def main():
           f"(removed {dropped_near_dup} near-duplicates)")
 
     # ── Merge manual_articles.json (overrides generated on slug collision) ──
-    # Rules:
-    #   1. Load generated_articles.json first (already in `arts`).
-    #   2. Load manual_articles.json — manual wins on any slug collision.
-    #   3. Sort combined list newest-first.
-    #   4. Print which source each article came from for build transparency.
-    generated_arts = arts   # renamed for clarity
+    generated_arts = arts
     manual_arts    = load_manual_articles()
-
     by_slug = {}
-    # Load generated first — lower priority
     for a in generated_arts:
         by_slug[a.get("slug", "")] = a
-    # Manual overrides generated on collision
     for a in manual_arts:
-        by_slug[a.get("slug", "")] = a
-
+        by_slug[a.get("slug", "")] = a   # manual overrides generated
     arts = sorted(by_slug.values(), key=lambda a: a.get("published", ""), reverse=True)
-
-    # Log source of each article for transparency
-    m_slugs = {a.get("slug") for a in manual_arts}
-    manual_count    = sum(1 for a in arts if a.get("slug") in m_slugs)
-    generated_count = len(arts) - manual_count
-    print(f"  Merged: {manual_count} manual + {generated_count} generated = {len(arts)} total")
-    for a in arts:
-        src = "manual" if a.get("slug") in m_slugs else "generated"
-        print(f"    [{src}] {a.get('slug','')[:65]}")
+    if manual_arts:
+        m_slugs = {a.get("slug") for a in manual_arts}
+        manual_count    = sum(1 for a in arts if a.get("slug") in m_slugs)
+        generated_count = len(arts) - manual_count
+        print(f"  Merged: {manual_count} manual + {generated_count} generated = {len(arts)} total")
 
     # ── Ensure all articles have a slug ──────────────────────────────────
     def _slugify(title):
