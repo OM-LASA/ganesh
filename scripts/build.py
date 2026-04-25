@@ -658,208 +658,158 @@ def is_high_value(article: dict) -> bool:
     # Any article with a title passes (never blank)
     return bool(article.get("title", "").strip())
 
-# ── BROADCAST IMAGE SYSTEM ──────────────────────────────────────────────────
-# Curated Unsplash images: server rooms, control rooms, vision mixers, cameras,
-# edit suites, studio equipment, network infrastructure. NO typewriters, newspapers.
 
-_BAD_IMAGE_IDS = {
-    "photo-1495020689067-958852a7765e",   # person reading newspaper
-    "photo-1504711434969-e33886168f5c",   # newspaper stack
-    "photo-1432821596592-e2c18b78144f",   # TYPEWRITER
-    "photo-1453738773917-9c3eff1db985",   # old newspaper on wooden desk
-    "photo-1557804506-669a67965ba0",      # generic business meeting room
+# ── STRICT LOCAL IMAGE SYSTEM ────────────────────────────────────────────────
+# IMPORTANT: The Streamic should not use online image fallback.
+# All article/card images must resolve to files committed under docs/assets/.
+
+_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+_BROKEN_IMAGE_PATHS = {
+    "/assets/images/_fallback/streamic-default.jpg",
+    "assets/images/_fallback/streamic-default.jpg",
+    "/assets/_fallback/streamic-default.jpg",
+    "assets/_fallback/streamic-default.jpg",
+}
+_RESERVED_ASSET_NAMES = {
+    "logo.png",
+    "fallback.jpg",
+    "favicon.png",
+    "favicon.ico",
+    "apple-touch-icon.png",
+    "nab_show_banner_news_headline_hero.png",
+    "nab-show-banner-news-headline-hero.png",
+    "gfx-hero-nab-floor.png",
+    "gfx-hero-nab-floor.jpg",
+    "hero-broadcast-male.png",
+    "hero-broadcast-male1png",
+    "insight-quic-infographic.jpg",
+    "neil-sadwelkar.jpg",
+    "studio-grade-ott-workflow-2026.png",
 }
 
-# 30 unique broadcast/media IT images — no repeats, all relevant
-_BROADCAST_IMAGES = [
-    # Server rooms & data centers
-    "photo-1558494949-ef010cbdcc31",      # server room blue LED racks
-    "photo-1544197150-b99a580bb7a8",      # data center corridor
-    "photo-1573164713988-8665fc963095",   # fiber optic cables glowing
-    "photo-1504384308090-c894fdcc538d",   # server room ceiling view
-    "photo-1451187580459-43490279c0fa",   # global network data visualization
-    # Broadcast control rooms & production
-    "photo-1598488035139-bdbb2231ce04",   # audio/broadcast mixing console
-    "photo-1478737270239-2f02b77fc618",   # control room buttons & panels
-    "photo-1524253482453-3fed8d2fe12b",   # video editing workstation
-    "photo-1616401784845-180882ba9ba8",   # camera / video production gear
-    "photo-1492619375914-88005aa9e8fb",   # video production multi-cam setup
-    # Post-production & edit suites
-    "photo-1535016120720-40c646be5580",   # video editing timeline on monitor
-    "photo-1547658719-da2b51169166",      # multi-monitor edit workstation
-    "photo-1605106702734-205df224ecce",   # VFX / tech screen
-    "photo-1581092918056-0c4c3acd3789",   # tech lab equipment
-    "photo-1611532736597-de2d4265fba3",   # broadcast / streaming setup
-    # AI & technology
-    "photo-1677442135703-1787eea5ce01",   # AI neural network visualization
-    "photo-1620712943543-bcc4688e7485",   # AI / machine learning
-    "photo-1593642632559-0c6d3fc62b89",   # circuit board close-up
-    "photo-1518770660439-4636190af475",   # circuit board macro
-    "photo-1515879218367-8466d910aaa4",   # code on dark screen
-    # Network & infrastructure
-    "photo-1545987796-200677ee1011",      # network fiber connections
-    "photo-1551288049-bebda4e38f71",      # data analytics dashboard
-    "photo-1504639725590-34d0984388bd",   # programming / code screen
-    "photo-1516321497487-e288fb19713f",   # tech workspace monitors
-    "photo-1497366754035-f200968a6e72",   # modern tech office
-    # Streaming & media
-    "photo-1586788680434-30d324b2d46f",   # live streaming / video
-    "photo-1560472355-536de3962603",      # video / media content
-    "photo-1561736778-92e52a7769ef",      # graphics workstation
-    "photo-1516321318423-f06f85e504b3",   # monitoring screens
-    "photo-1517694712202-14dd9538aa97",   # tech laptop workspace
-]
+def _asset_rel_from_url(path: str) -> str:
+    """Return docs-relative asset path like 'assets/name.jpg', or ''."""
+    if not path or not isinstance(path, str):
+        return ""
+    p = path.strip().split("?", 1)[0].split("#", 1)[0]
+    if p.startswith(("http://", "https://", "//")):
+        return ""
+    if p.startswith("/"):
+        p = p[1:]
+    if not p.startswith("assets/"):
+        return ""
+    return p
 
-def _unsplash_url(photo_id):
-    return f"https://images.unsplash.com/{photo_id}?w=1200&auto=format&fit=crop&q=80"
+def _asset_url_exists(path: str) -> bool:
+    """True only for local /assets/... paths that exist under docs/."""
+    rel = _asset_rel_from_url(path)
+    return bool(rel and os.path.isfile(os.path.join(DOCS, rel)))
 
-def _is_bad_image(url):
-    """Check if an image URL is in the blacklist."""
-    if not url:
-        return True
-    return any(bad_id in url for bad_id in _BAD_IMAGE_IDS)
+def _normalise_asset_url(path: str) -> str:
+    """Convert an existing local asset path to canonical '/assets/...' form."""
+    rel = _asset_rel_from_url(path)
+    return f"/{rel}" if rel else ""
 
-_POOL_IDS = set(_BROADCAST_IMAGES)
+def _discover_local_article_images():
+    """Find usable editorial images committed anywhere under docs/assets/.
 
-def _image_is_from_pool(url: str) -> bool:
-    """True only if URL is an images.unsplash.com link to a pool photo ID."""
-    if not url:
-        return False
-    if "images.unsplash.com" not in url:
-        return False
-    if "photo-" not in url:
-        return False
-    try:
-        pid = "photo-" + url.split("photo-", 1)[1].split("?", 1)[0]
-    except IndexError:
-        return False
-    return pid in _POOL_IDS
+    Excludes logos, fallback images, and known manually reserved hero/assets.
+    Returns canonical URLs such as '/assets/post-production-workflow.jpg'.
+    """
+    assets_root = os.path.join(DOCS, "assets")
+    found = []
+    if not os.path.isdir(assets_root):
+        return found
+
+    for root_dir, _, files in os.walk(assets_root):
+        for fname in sorted(files):
+            low = fname.lower()
+            if not low.endswith(_IMAGE_EXTS):
+                continue
+            if low in _RESERVED_ASSET_NAMES:
+                continue
+            disk_path = os.path.join(root_dir, fname)
+            rel = os.path.relpath(disk_path, DOCS).replace(os.sep, "/")
+            if rel in {"assets/fallback.jpg", "assets/logo.png"}:
+                continue
+            found.append(f"/{rel}")
+
+    # Stable order keeps builds deterministic.
+    return sorted(dict.fromkeys(found))
+
+def _stable_pick_local_image(article: dict, local_images: list) -> str:
+    """Deterministically pick one local image for an article."""
+    if not local_images:
+        return "/assets/fallback.jpg"
+    key = (article.get("slug") or article.get("title") or "").strip()
+    if not key:
+        key = json.dumps(article, sort_keys=True, ensure_ascii=False)[:200]
+    idx = sum((i + 1) * ord(ch) for i, ch in enumerate(key)) % len(local_images)
+    return local_images[idx]
 
 def _fix_article_images(arts):
-    """Resolve final image_url for every article using strict priority order.
+    """Resolve final image_url for every article using STRICT LOCAL priority.
 
     Priority:
-      1. Manual articles (_source=="manual"): image_url already set correctly
-         by load_manual_articles() — confirmed on disk. Preserve as-is.
-      2. Generated articles: use image_url if it is a valid Unsplash pool URL
-         or a local /assets/ file that exists on disk.
-      3. Fallback: generated "image" field ONLY if the file exists on disk
-         AND it is not the broken /assets/images/_fallback/streamic-default.jpg.
-      4. Last resort: /assets/fallback.jpg.
+      1. Existing image_url if it is a real file under docs/assets/.
+      2. Existing image field if it is a real file under docs/assets/.
+      3. Deterministic local image from the committed docs/assets/ pool.
+      4. /assets/fallback.jpg only if no editorial images exist.
 
-    Unsplash pool deduplication still applies to generated articles that use
-    pool images, so the homepage never shows the same Unsplash photo twice.
+    This deliberately removes all online image assignment.
     """
-    used_images = set()
-    pool_idx = 0
+    local_images = _discover_local_article_images()
+    assigned = fixed_missing = blocked_online = 0
 
-    def _next_pool_image():
-        nonlocal pool_idx
-        for _ in range(len(_BROADCAST_IMAGES)):
-            img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
-            pool_idx += 1
-            if img_id not in used_images:
-                used_images.add(img_id)
-                return _unsplash_url(img_id)
-        used_images.clear()
-        img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
-        pool_idx += 1
-        used_images.add(img_id)
-        return _unsplash_url(img_id)
-
-    def _local_exists(path):
-        """True if path is a /assets/... path and the file exists under docs/."""
-        if not path:
-            return False
-        p = path if path.startswith("/") else "/" + path
-        return os.path.isfile(os.path.join(DOCS, p.lstrip("/")))
-
-    BROKEN_FALLBACK = "/assets/images/_fallback/streamic-default.jpg"
-
-    replaced = 0
     for a in arts:
-        # ── PRIORITY 1: manual article ────────────────────────────────────
-        # load_manual_articles() already resolved image_url to a confirmed
-        # on-disk path or /assets/fallback.jpg. Nothing to do.
-        if a.get("_source") == "manual":
-            a.setdefault("image_credit",     "The Streamic")
-            a.setdefault("image_license",    "Site Asset")
-            a.setdefault("image_license_url","")
+        if not isinstance(a, dict):
             continue
 
-        # ── PRIORITY 2: generated article — try image_url first ───────────
         img_url = (a.get("image_url") or "").strip()
-
-        # 2a. Local /assets/ image_url — only if file exists on disk
-        if (img_url.startswith("/assets/") or img_url.startswith("assets/")):
-            if _local_exists(img_url):
-                a["image_credit"]      = a.get("image_credit") or "The Streamic"
-                a["image_license"]     = a.get("image_license") or "Site Asset"
-                a["image_license_url"] = a.get("image_license_url") or ""
-                continue
-            # Local path but file missing — fall through
-
-        # 2b. Unsplash pool image_url
-        if _image_is_from_pool(img_url):
-            try:
-                photo_id = "photo-" + img_url.split("photo-", 1)[1].split("?", 1)[0]
-            except IndexError:
-                photo_id = ""
-            if photo_id and photo_id not in used_images:
-                used_images.add(photo_id)
-                a["image_credit"]      = "Unsplash"
-                a["image_license"]     = "Unsplash License"
-                a["image_license_url"] = "https://unsplash.com/license"
-                continue
-            elif photo_id:
-                # Duplicate pool image — assign next pool image
-                a["image_url"]         = _next_pool_image()
-                a["image_credit"]      = "Unsplash"
-                a["image_license"]     = "Unsplash License"
-                a["image_license_url"] = "https://unsplash.com/license"
-                replaced += 1
-                continue
-
-        # ── PRIORITY 3: "image" field only if valid local file exists ─────
-        # Ignore the broken fallback path that pollutes generated JSON.
         img_field = (a.get("image") or "").strip()
-        if (img_field
-                and img_field != BROKEN_FALLBACK
-                and img_field.startswith("/assets/")
-                and _local_exists(img_field)):
-            a["image_url"]         = img_field
-            a["image_credit"]      = "The Streamic"
-            a["image_license"]     = "Site Asset"
-            a["image_license_url"] = ""
-            continue
 
-        # ── PRIORITY 4: assign next Unsplash pool image ───────────────────
-        a["image_url"]         = _next_pool_image()
-        a["image_credit"]      = "Unsplash"
-        a["image_license"]     = "Unsplash License"
-        a["image_license_url"] = "https://unsplash.com/license"
-        replaced += 1
+        chosen = ""
 
-    if replaced:
-        print(f"  Image fixer: {replaced} generated articles assigned pool images")
+        # 1. Keep valid committed local image_url.
+        if img_url and img_url not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img_url):
+            chosen = _normalise_asset_url(img_url)
 
+        # 2. Else try valid committed local image field.
+        elif img_field and img_field not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img_field):
+            chosen = _normalise_asset_url(img_field)
+            fixed_missing += 1
+
+        # 3. Online/broken/missing image detected — assign from local deck.
+        else:
+            if img_url.startswith(("http://", "https://", "//")) or img_field.startswith(("http://", "https://", "//")):
+                blocked_online += 1
+            chosen = _stable_pick_local_image(a, local_images)
+            assigned += 1
+
+        a["image_url"] = chosen
+        a["image"] = chosen
+        a["image_credit"] = "The Streamic"
+        a["image_license"] = "Site Asset"
+        a["image_license_url"] = ""
+
+        if not a.get("image_alt"):
+            pretty = os.path.splitext(os.path.basename(chosen))[0].replace("-", " ").replace("_", " ").title()
+            a["image_alt"] = f"The Streamic editorial image: {pretty}"
+
+    print(
+        f"  Local image fixer: {len(local_images)} usable assets, "
+        f"{assigned} assigned, {fixed_missing} recovered from image field, "
+        f"{blocked_online} online images blocked"
+    )
 
 def _hp_img(a, base=""):
-    img = eu(a.get("image_url", "") or a.get("image", ""))
-    if img:
-        return img
-    cat = (a.get("category") or "featured").lower()
-    fallbacks = {
-        "featured": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80",
-        "newsroom": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&auto=format&fit=crop&q=80",
-        "cloud": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&auto=format&fit=crop&q=80",
-        "infrastructure": "https://images.unsplash.com/photo-1545987796-200677ee1011?w=1200&auto=format&fit=crop&q=80",
-        "graphics": "https://images.unsplash.com/photo-1547658719-da2b51169166?w=1200&auto=format&fit=crop&q=80",
-        "streaming": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&auto=format&fit=crop&q=80",
-        "ai-post-production": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&auto=format&fit=crop&q=80",
-        "playout": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80",
-    }
-    return fallbacks.get(cat, fallbacks["featured"])
+    """Homepage/category helper: return only local images under docs/assets/."""
+    for key in ("image_url", "image"):
+        img = (a.get(key) or "").strip()
+        if img and img not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img):
+            return eu(_normalise_asset_url(img))
+    return eu("/assets/fallback.jpg")
+
 
 def _hp_tag(a):
     cinfo = CAT.get(a.get("category", "featured"), CAT["featured"])
@@ -1803,8 +1753,8 @@ def article_page(a):
     cinfo_lbl   = cinfo.get('label','')
     cinfo_icon2 = cinfo.get('icon','')
     cinfo_page  = CAT_PAGE.get(cat, cat+'.html')
-    lic_url   = e(a.get('image_license_url','https://unsplash.com/license'))
-    lic_label = e(a.get('image_license','Unsplash License'))
+    lic_url   = e(a.get('image_license_url',''))
+    lic_label = e(a.get('image_license','Site Asset'))
     if not is_ed and src_url:
         title_html = f'<h1><a href="{e(src_url)}" target="_blank" rel="noopener noreferrer nofollow" style="color:inherit;text-decoration:none;">{e(title)}</a></h1>'
     else:
@@ -1832,7 +1782,7 @@ def article_page(a):
     </div>
     <figure>
       <img src="{eu(img)}" alt="{e(title)}" loading="eager">
-      <figcaption>{e(a.get("image_credit","Photo via Unsplash &#8212; free to use under the Unsplash License"))} &#8212; <a href="{lic_url}" rel="nofollow noopener" target="_blank" style="color:var(--ink4)">{lic_label}</a></figcaption>
+      <figcaption>{e(a.get("image_credit","The Streamic"))} &#8212; {lic_label}</figcaption>
     </figure>
     <div class="art-body">{source_banner}{body}{editors_note}</div>
     {source_credit}
