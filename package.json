@@ -1,0 +1,20 @@
+{
+  "name": "thestreamic",
+  "version": "3.0.0",
+  "description": "The Streamic \u2014 Broadcast & Streaming Technology Publication",
+  "type": "commonjs",
+  "scripts": {
+    "generate": "node scripts/generate.js",
+    "build": "python3 scripts/build.py"
+  },
+  "dependencies": {
+    "rss-parser": "^3.13.0",
+    "node-fetch": "^2.7.0",
+    "fs-extra": "^11.2.0",
+    "slugify": "^1.6.6",
+    "html-entities": "^2.5.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

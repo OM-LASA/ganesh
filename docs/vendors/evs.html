@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',
+    'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0VSHDN3ZR6"></script>
+  <script>gtag('js',new Date());gtag('config','G-0VSHDN3ZR6');</script>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EVS Broadcast Equipment — Systems Integration Brief | The Streamic</title>
+  <meta name="description" content="Engineering integration briefs for EVS XS-VIA, IPDirector, Cerebrum, XT4K, and DYVI production switcher. Protocol stacks, APIs, and real-world integration constraints for live sports and event production.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://www.thestreamic.in/vendors/evs.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Streamic">
+  <meta property="og:title" content="EVS Broadcast Equipment — Systems Integration Brief | The Streamic">
+  <meta property="og:url" content="https://www.thestreamic.in/vendors/evs.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    :root{
+      --evs-red:   #E8001A;
+      --evs-dark:  #0c0005;
+      --evs-mid:   #180010;
+    }
+    .vendor-hero{
+      background: linear-gradient(135deg, var(--evs-dark) 0%, var(--evs-mid) 50%, #1a0008 100%);
+      padding:64px 0 72px;position:relative;overflow:hidden;
+    }
+    .vendor-hero::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 600px 400px at 75% 50%, rgba(232,0,26,.18) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .vendor-hero::after{
+      content:'';position:absolute;inset:0;
+      background:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E");
+      pointer-events:none;
+    }
+    .vendor-logo-pill{
+      display:inline-flex;align-items:center;gap:12px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+      padding:10px 18px;border-radius:40px;margin-bottom:24px;
+    }
+    .vendor-logo-pill .vl-icon{
+      width:32px;height:32px;border-radius:8px;
+      background:var(--evs-red);display:flex;align-items:center;
+      justify-content:center;font-weight:900;font-size:12px;color:#fff;letter-spacing:-.5px;
+    }
+    .vendor-logo-pill span{color:rgba(255,255,255,.8);font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+    .vendor-hero h1{
+      font-family:var(--serif);font-size:clamp(32px,5vw,58px);
+      color:#fff;letter-spacing:-.04em;line-height:1.05;
+      margin:0 0 18px;max-width:700px;
+    }
+    .vendor-hero p.lead{
+      font-size:clamp(15px,1.6vw,18px);color:rgba(255,255,255,.65);
+      line-height:1.7;max-width:600px;margin:0 0 32px;
+    }
+    .hero-tags{display:flex;flex-wrap:wrap;gap:8px;}
+    .hero-tag{
+      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+      color:rgba(255,255,255,.7);font-size:11px;font-weight:700;
+      padding:4px 12px;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;
+    }
+    .product-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+      gap:24px;margin-top:52px;
+    }
+    .product-card{
+      background:var(--white);border:1px solid var(--line);border-radius:16px;
+      overflow:hidden;transition:box-shadow .25s,transform .25s;
+    }
+    .product-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12);transform:translateY(-3px);}
+    .product-card-top{height:8px;background:var(--evs-red);}
+    .product-card-body{padding:24px 26px 28px;}
+    .product-type{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--evs-red);margin-bottom:10px;display:block;}
+    .product-card h3{font-family:var(--serif);font-size:19px;letter-spacing:-.02em;margin:0 0 10px;line-height:1.25;color:var(--ink);}
+    .product-card .dek{font-size:13.5px;color:var(--ink3);line-height:1.65;margin:0 0 18px;}
+    .prod-specs{display:flex;flex-direction:column;gap:0;}
+    .spec-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+    .spec-row:last-child{border-bottom:none;}
+    .spec-label{flex-shrink:0;width:110px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);padding-top:1px;}
+    .spec-val{color:var(--ink2);line-height:1.5;flex:1;}
+    .spec-val code{background:#f0f0f5;padding:1px 6px;border-radius:4px;font-size:11px;font-family:monospace;color:var(--ink);}
+    .risk-badge{display:inline-block;background:#fff3f3;border:1px solid #ffd0d0;color:#c0392b;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.4px;text-transform:uppercase;margin-right:6px;}
+    .integration-overview{background:var(--bg);border-radius:16px;padding:32px 36px;margin:40px 0;}
+    .integration-overview h2{font-family:var(--serif);font-size:22px;margin:0 0 6px;letter-spacing:-.02em;}
+    .integration-overview p{font-size:14.5px;color:var(--ink3);line-height:1.7;margin:0 0 20px}
+    .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+    .int-item{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+    .int-item .il{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--evs-red);margin-bottom:6px;}
+    .int-item .iv{font-size:13px;color:var(--ink2);font-weight:500;}
+    .back-nav{display:inline-flex;align-items:center;gap:6px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none;margin-bottom:36px;}
+    .back-nav:hover{opacity:.75;}
+    @media(max-width:680px){
+      .product-grid{grid-template-columns:1fr;}
+      .int-grid{grid-template-columns:1fr 1fr;}
+      .vendor-hero{padding:44px 0 52px;}
+    }
+  </style>
+  <meta name="google-adsense-account" content="ca-pub-8033069131874524">
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a href="../featured.html" class="nav-logo">
+    <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" aria-hidden="true">
+    <span>The Streamic</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../featured.html">Home</a></li>
+    <li><a href="../ai-post-production.html">AI in Broadcasting</a></li>
+    <li><a href="../howto.html">How-To Guides</a></li>
+    <li><a href="../post-production-workflows.html">Post Production Workflows</a></li>
+    <li><a href="../index.html" class="active">Home</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="../about.html" class="nav-desk">About</a>
+    <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-mob').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</div>
+<div class="nav-mob">
+  <a href="../featured.html">Home</a>
+  <a href="../ai-post-production.html">AI in Broadcasting</a>
+  <a href="../howto.html">How-To Guides</a>
+  <a href="../post-production-workflows.html">Post Production Workflows</a>
+  <a href="../index.html">Home</a>
+  <a href="../about.html">About</a>
+</div></nav>
+
+<!-- Hero -->
+<div class="vendor-hero">
+  <div class="w" style="max-width:900px;position:relative;z-index:1">
+    <div class="vendor-logo-pill">
+      <div class="vl-icon">EVS</div>
+      <span>Broadcast Systems Integration Brief</span>
+    </div>
+    <h1>EVS Broadcast Equipment</h1>
+    <p class="lead">The global standard for live sports production, slow-motion replay, and live content management. XS-VIA servers are the operational hub of virtually every major live sports OB truck and host broadcast facility.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">Live Production</span>
+      <span class="hero-tag">Slow-Motion Replay</span>
+      <span class="hero-tag">IP Contribution</span>
+      <span class="hero-tag">SRT / NDI</span>
+      <span class="hero-tag">SMPTE ST 2110</span>
+      <span class="hero-tag">REST API</span>
+    </div>
+  </div>
+</div>
+
+<main>
+<div class="w" style="max-width:940px;padding:52px 0 80px">
+
+  <a href="../index.html" class="back-nav">&#8592; Back to Home</a>
+
+  <!-- Integration overview -->
+  <div class="integration-overview">
+    <h2>Platform Overview</h2>
+    <p>EVS systems are hardware appliances — not software deployable on commodity servers. The XS-VIA runs a proprietary Linux-based OS and exposes both a file-based MXF/OP-1A output and a real-time API over Ethernet. Cerebrum is EVS's facility-level broadcast controller, managing not just EVS servers but third-party routers, multiviewers, and playout devices over a single unified control plane. Integration projects almost always involve the EVS LSM (Live Slow Motion) remote controller protocol alongside REST or IPLink XML.</p>
+    <div class="int-grid">
+      <div class="int-item"><div class="il">Control API</div><div class="iv">REST + IPLink XML</div></div>
+      <div class="int-item"><div class="il">Video I/O</div><div class="iv">ST 2110-20/30/40, 12G-SDI</div></div>
+      <div class="int-item"><div class="il">File Format</div><div class="iv">MXF OP-1A / OP-Atom</div></div>
+      <div class="int-item"><div class="il">IP Transport</div><div class="iv">SRT, NDI, Zixi</div></div>
+      <div class="int-item"><div class="il">Controller</div><div class="iv">LSM remote, Cerebrum</div></div>
+      <div class="int-item"><div class="il">Monitoring</div><div class="iv">SNMP v2c, syslog</div></div>
+    </div>
+  </div>
+
+  <!-- Product grid -->
+  <h2 style="font-family:var(--serif);font-size:clamp(20px,2.5vw,28px);letter-spacing:-.03em;margin:0 0 6px">Product Integration Briefs</h2>
+  <p style="font-size:14px;color:var(--ink4);margin:0 0 8px">Engineering detail on integration interfaces, protocol stacks, and real-world deployment constraints.</p>
+
+  <div class="product-grid">
+
+    <!-- XS-VIA -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Live Production Server</span>
+        <h3>XS-VIA Live Production Server</h3>
+        <p class="dek">4U rack-mount hardware server for live ingest, slow-motion replay, and live content management. Supports up to 16 channels of 1080p at 50/60fps simultaneously. Standard in OB trucks and host broadcast facilities globally.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Proprietary FPGA-based signal processing on custom PCIe cards. Linux host OS. Video essence stored on internal NVMe RAID — not accessible as a standard NAS share. External access via EVS IPLink or MXF file export only.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Video I/O</div>
+            <div class="spec-val">
+              <code>ST 2110-20</code> <code>ST 2110-30</code> <code>ST 2110-40</code> <code>12G-SDI</code>
+              — ST 2110 requires a dedicated 25GbE NIC (Mellanox ConnectX-5 or certified equivalent). IP and SDI cannot be mixed on the same channel simultaneously.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Control API</div>
+            <div class="spec-val">
+              <code>EVS IPLink XML</code> <code>REST v1</code>
+              — IPLink (TCP port 4500) is the legacy protocol used by LSM controllers and most third-party integrations. REST API (v1, HTTP port 8080) was introduced in 2023 for clip management and replay trigger.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">AI Features</div>
+            <div class="spec-val">XtraMotion AI super slow-motion (frame interpolation to 8× slow) runs on an embedded GPU. Sports AI (automatic event detection) is delivered via the EVS Live Assist module — requires a separate server running EVS AI Engine connected over Ethernet.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>PTP grandmaster must be an external hardware clock (GPS-disciplined). The XS-VIA cannot act as its own PTP grandmaster. In OB truck deployments without GPS lock, XS-VIA will accept PTP from a software grandmaster but timing jitter can cause intermittent frame drops under load — not always reproducible in testing.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IPDirector -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Live Content Management</span>
+        <h3>IPDirector</h3>
+        <p class="dek">Windows client application for logging, searching, and managing content across multiple XS-VIA servers in real time. The primary tool for replay operators, highlight producers, and live archive teams at major sports events.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Windows-only client (no web UI, no Linux). Communicates with XS-VIA servers via EVS proprietary TCP protocol (port 4500). SQL Server backend for production metadata. Multi-server management via EVS XNet shared bus.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">APIs</div>
+            <div class="spec-val">
+              <code>EVS IPLink XML (TCP 4500)</code> <code>REST v1</code> <code>MXF export</code>
+              — Third-party MAMs (Avid Interplay, Dalet) connect via the IPLink XML protocol or MXF file delivery over SMB/CIFS. Direct database access is not supported.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">MAM Integration</div>
+            <div class="spec-val">Completed clips transfer to NAS via SMB share. The transfer service runs on a dedicated Windows server — not on the XS-VIA itself. Target MAM must watch the SMB drop folder and trigger ingest automatically; push notification from EVS is not available without the EVS Medialogg+ connector.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>IPDirector runs as a 32-bit Windows application even in 2026. Antivirus software (particularly endpoint detection products) regularly quarantines IPDirector's DLLs on first installation. Whitelist the entire EVS install directory at the endpoint management layer before deployment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cerebrum -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Broadcast Facility Controller</span>
+        <h3>EVS Cerebrum</h3>
+        <p class="dek">Software-defined broadcast control system that manages signal routing, device control, and facility logic across mixed-vendor environments. Used in OB trucks, broadcast centres, and remote production hubs as the primary facility control layer.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Windows Server application with a web-based control panel (HTML5). Driver model: each device type (router, multiviewer, XS-VIA, switcher) has a device driver loaded by the Cerebrum service. No container support — Windows Server bare-metal or VM only.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Protocols</div>
+            <div class="spec-val">
+              <code>NMOS IS-04</code> <code>NMOS IS-05</code> <code>REST API</code> <code>Ember+ (console control)</code>
+              — NMOS IS-04/IS-05 support means Cerebrum can discover and route ST 2110 sources alongside traditional SDI. Ember+ used for audio console (Lawo, SSL) integration.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Device Support</div>
+            <div class="spec-val">Native drivers for Ross Ultrix, Miranda/Grass Valley routers, Sony MVS switchers, Lawo audio consoles, Evertz multiviewers, and all EVS servers. Third-party devices without native drivers require a custom driver — EVS provides a Cerebrum driver SDK (C++ API).</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>Cerebrum's device state database can diverge from actual device state after a device reboot if the device does not send an unsolicited state update. This affects primarily older SDI routers. Manual state refresh (right-click → resync in the device tree) is the only resolution until the router driver is updated.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- XT4K -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">UHD Live Production Server</span>
+        <h3>EVS XT4K</h3>
+        <p class="dek">The UHD successor to the XT3, targeting 4K/UHD sports production. Supports native 4K HDR workflows with HLG and PQ transfer functions alongside a backwards-compatible HD mode for mixed-resolution events.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">4U hardware appliance. 4K processing via updated FPGA pipeline. Up to 8 channels of 4K 50/60fps. 12G-SDI and ST 2110-20 UHD (4K) video I/O. NVMe RAID — same internal storage architecture as XS-VIA.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Video I/O</div>
+            <div class="spec-val">
+              <code>12G-SDI (4K)</code> <code>3G-SDI (HD)</code> <code>ST 2110-20 UHD</code>
+              — 4K HDR: HLG (Hybrid Log-Gamma, ITU-R BT.2100) and PQ (ST 2084). SDR trims available via real-time LUT processing on board.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Control API</div>
+            <div class="spec-val">Same IPLink XML and REST v1 API as XS-VIA. All existing LSM controllers (LSM-VIA, Smart Controller) are XT4K-compatible without firmware update.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>Mixed 4K/HD production (XT4K + XS-VIA on the same EVS network) requires careful XNet bus bandwidth planning. 4K clips transferred over XNet at full resolution can saturate a 10GbE XNet segment during replays — always use dedicated XNet 25GbE for mixed-resolution facilities.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.product-grid -->
+
+  <!-- Author bio -->
+  <div class="art-author-bio" style="margin-top:56px">
+    <div class="bio-avatar">S</div>
+    <div class="bio-body">
+      <strong class="bio-name">Prerak K Mehta</strong>
+      <span class="bio-title">Founder, The Streamic &middot; Dublin, Ireland</span>
+      <p class="bio-text">Broadcast technology professional with total 25+ years of IT and 20 years of Media/Post Production &amp; Broadcast IT systems experience. He covers broadcast engineering, streaming, infrastructure, and media technology trends for The Streamic.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;background:#f5f5f7;border-radius:12px;padding:16px 20px;font-size:13px;color:var(--ink3)">
+    <strong>Editorial Note:</strong> These integration briefs are independently researched. No vendor has paid for inclusion or content review.
+    <a href="../editorial-policy.html" style="color:var(--blue);margin-left:6px">Editorial Policy &rarr;</a>
+  </div>
+  <div style="margin-top:32px">
+    <a href="../index.html" class="back-nav">&#8592; Back to Home</a>
+  </div>
+
+</div>
+</main>
+
+<footer class="footer"><div class="footer-grid">
+  <div><div class="footer-brand">The Streamic</div>
+    <p class="footer-tag">Independent broadcast &amp; streaming technology journalism.</p>
+  </div>
+  <div class="footer-col"><h4>Coverage</h4>
+    <a href="../ai-post-production.html">AI in Broadcasting</a>
+    <a href="../howto.html">How-To Guides</a>
+    <a href="../index.html">Home</a>
+  </div>
+  <div class="footer-col"><h4>Site</h4>
+    <a href="../about.html">About</a>
+    <a href="../editorial-policy.html">Editorial Policy</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+  </div>
+</div>
+<div class="footer-bottom">
+  <span>&copy; 2026 The Streamic. All rights reserved.</span>
+</div></footer>
+
+<div id="ts-cookie"><div class="cookie-in"><div class="cookie-txt">
+  <strong>We use cookies</strong> <a href="../privacy.html">Privacy Policy</a>
+</div><div class="cookie-btns">
+  <button class="cookie-no" onclick="tsCC(false)">Reject optional</button>
+  <button class="cookie-ok" onclick="tsCC(true)">Accept all</button>
+</div></div></div>
+<script>(function(){var K='ts_cc',s=localStorage.getItem(K),b=document.getElementById('ts-cookie');
+if(!s&&b)b.style.display='block';
+window.tsCC=function(ok){localStorage.setItem(K,ok?'granted':'denied');if(b)b.style.display='none';
+if(typeof gtag!='undefined')gtag('consent','update',{analytics_storage:ok?'granted':'denied',
+ad_storage:ok?'granted':'denied',ad_user_data:ok?'granted':'denied',ad_personalization:ok?'granted':'denied'});};
+if(s==='granted'&&typeof gtag!='undefined')gtag('consent','update',{analytics_storage:'granted',
+ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted'});})();
+</script>
+</body></html>

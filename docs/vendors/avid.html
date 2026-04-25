@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',
+    'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0VSHDN3ZR6"></script>
+  <script>gtag('js',new Date());gtag('config','G-0VSHDN3ZR6');</script>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Avid Technology — Broadcast Systems Integration Brief | The Streamic</title>
+  <meta name="description" content="Engineering integration briefs for Avid Media Composer, MediaCentral Cloud UX, Interplay Production PAM, and iNEWS NRCS. Protocol stacks, APIs, and known integration complexities.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://www.thestreamic.in/vendors/avid.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Streamic">
+  <meta property="og:title" content="Avid Technology — Broadcast Systems Integration Brief | The Streamic">
+  <meta property="og:url" content="https://www.thestreamic.in/vendors/avid.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    :root{
+      --avid-blue: #0066FF;
+      --avid-dark: #0a0a0f;
+      --avid-mid:  #111827;
+    }
+    .vendor-hero{
+      background: linear-gradient(135deg, var(--avid-dark) 0%, var(--avid-mid) 50%, #0a1628 100%);
+      padding: 64px 0 72px;
+      position: relative;
+      overflow: hidden;
+    }
+    .vendor-hero::before{
+      content:'';
+      position:absolute;inset:0;
+      background: radial-gradient(ellipse 600px 400px at 80% 50%, rgba(0,102,255,.15) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .vendor-hero::after{
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 60L60 0' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+      pointer-events:none;
+    }
+    .vendor-logo-pill{
+      display:inline-flex;align-items:center;gap:12px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+      padding:10px 18px;border-radius:40px;margin-bottom:24px;
+    }
+    .vendor-logo-pill .vl-icon{
+      width:32px;height:32px;border-radius:8px;
+      background:var(--avid-blue);display:flex;align-items:center;
+      justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-.5px;
+    }
+    .vendor-logo-pill span{color:rgba(255,255,255,.8);font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+    .vendor-hero h1{
+      font-family:var(--serif);
+      font-size:clamp(32px,5vw,58px);
+      color:#fff;letter-spacing:-.04em;line-height:1.05;
+      margin:0 0 18px;max-width:700px;
+    }
+    .vendor-hero p.lead{
+      font-size:clamp(15px,1.6vw,18px);
+      color:rgba(255,255,255,.65);line-height:1.7;
+      max-width:600px;margin:0 0 32px;
+    }
+    .hero-tags{display:flex;flex-wrap:wrap;gap:8px;}
+    .hero-tag{
+      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+      color:rgba(255,255,255,.7);font-size:11px;font-weight:700;
+      padding:4px 12px;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;
+    }
+    /* Product grid */
+    .product-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+      gap:24px;margin-top:52px;
+    }
+    .product-card{
+      background:var(--white);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+      transition:box-shadow .25s,transform .25s;
+      cursor:pointer;
+      text-decoration:none;
+      display:block;
+      color:inherit;
+    }
+    .product-card:hover{
+      box-shadow:0 12px 40px rgba(0,0,0,.12);
+      transform:translateY(-3px);
+    }
+    .product-card-top{
+      height:8px;
+      background:var(--avid-blue);
+    }
+    .product-card-body{padding:24px 26px 28px;}
+    .product-type{
+      font-size:10px;font-weight:800;text-transform:uppercase;
+      letter-spacing:1px;color:var(--avid-blue);margin-bottom:10px;display:block;
+    }
+    .product-card h3{
+      font-family:var(--serif);font-size:19px;letter-spacing:-.02em;
+      margin:0 0 10px;line-height:1.25;color:var(--ink);
+    }
+    .product-card .dek{
+      font-size:13.5px;color:var(--ink3);line-height:1.65;margin:0 0 18px;
+    }
+    .prod-specs{display:flex;flex-direction:column;gap:0;}
+    .spec-row{
+      display:flex;align-items:flex-start;gap:10px;
+      padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;
+    }
+    .spec-row:last-child{border-bottom:none;}
+    .spec-label{
+      flex-shrink:0;width:110px;font-size:10px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);padding-top:1px;
+    }
+    .spec-val{color:var(--ink2);line-height:1.5;flex:1;}
+    .spec-val code{
+      background:#f0f0f5;padding:1px 6px;border-radius:4px;
+      font-size:11px;font-family:monospace;color:var(--ink);
+    }
+    .risk-badge{
+      display:inline-block;background:#fff3f3;border:1px solid #ffd0d0;
+      color:#c0392b;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;
+      letter-spacing:.4px;text-transform:uppercase;margin-right:6px;
+    }
+    /* Integration overview section */
+    .integration-overview{
+      background:var(--bg);border-radius:16px;padding:32px 36px;
+      margin:40px 0;
+    }
+    .integration-overview h2{
+      font-family:var(--serif);font-size:22px;margin:0 0 6px;letter-spacing:-.02em;
+    }
+    .integration-overview p{font-size:14.5px;color:var(--ink3);line-height:1.7;margin:0 0 20px}
+    .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+    .int-item{
+      background:var(--white);border:1px solid var(--line);border-radius:10px;
+      padding:14px 16px;
+    }
+    .int-item .il{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);margin-bottom:6px;}
+    .int-item .iv{font-size:13px;color:var(--ink2);font-weight:500;}
+    /* Back nav */
+    .back-nav{
+      display:inline-flex;align-items:center;gap:6px;
+      color:var(--blue);font-size:13px;font-weight:600;
+      text-decoration:none;margin-bottom:36px;
+    }
+    .back-nav:hover{opacity:.75;}
+    @media(max-width:680px){
+      .product-grid{grid-template-columns:1fr;}
+      .int-grid{grid-template-columns:1fr 1fr;}
+      .vendor-hero{padding:44px 0 52px;}
+    }
+  </style>
+  <meta name="google-adsense-account" content="ca-pub-8033069131874524">
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a href="../featured.html" class="nav-logo">
+    <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" aria-hidden="true">
+    <span>The Streamic</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../featured.html">Home</a></li>
+    <li><a href="../ai-post-production.html">AI in Broadcasting</a></li>
+    <li><a href="../howto.html">How-To Guides</a></li>
+    <li><a href="../post-production-workflows.html">Post Production Workflows</a></li>
+    <li><a href="../index.html" class="active">Home</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="../about.html" class="nav-desk">About</a>
+    <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-mob').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</div>
+<div class="nav-mob">
+  <a href="../featured.html">Home</a>
+  <a href="../ai-post-production.html">AI in Broadcasting</a>
+  <a href="../howto.html">How-To Guides</a>
+  <a href="../post-production-workflows.html">Post Production Workflows</a>
+  <a href="../index.html">Home</a>
+  <a href="../about.html">About</a>
+</div></nav>
+
+<!-- Hero -->
+<div class="vendor-hero">
+  <div class="w" style="max-width:900px;position:relative;z-index:1">
+    <div class="vendor-logo-pill">
+      <div class="vl-icon">Av</div>
+      <span>Broadcast Systems Integration Brief</span>
+    </div>
+    <h1>Avid Technology</h1>
+    <p class="lead">The dominant platform for NLE, production asset management, and newsroom computer systems in tier-1 broadcast. MediaCentral is the integration hub; everything else connects through it.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">NLE</span>
+      <span class="hero-tag">PAM / MAM</span>
+      <span class="hero-tag">NRCS</span>
+      <span class="hero-tag">MOS 2.8.5 / 3.0</span>
+      <span class="hero-tag">AAF / OMF</span>
+      <span class="hero-tag">REST API</span>
+    </div>
+  </div>
+</div>
+
+<main>
+<div class="w" style="max-width:940px;padding:52px 0 80px">
+
+  <a href="../index.html" class="back-nav">&#8592; Back to Home</a>
+
+  <!-- Integration overview -->
+  <div class="integration-overview">
+    <h2>Platform Overview</h2>
+    <p>Avid's product stack is built around the MediaCentral Platform — a microservices-based middleware layer that abstracts access to Media Composer (NLE), Interplay Production (PAM), iNEWS (NRCS), and shared storage. Third-party systems integrate via the MediaCentral REST API (v1/v2) rather than directly into individual applications. Understanding this architectural pattern is the prerequisite for any Avid integration project.</p>
+    <div class="int-grid">
+      <div class="int-item"><div class="il">Primary API</div><div class="iv">REST v2 + SOAP (legacy)</div></div>
+      <div class="int-item"><div class="il">NRCS Protocol</div><div class="iv">MOS 2.8.5 / 3.0</div></div>
+      <div class="int-item"><div class="il">NLE Interchange</div><div class="iv">AAF, OMF, MXF OP-Atom</div></div>
+      <div class="int-item"><div class="il">Auth</div><div class="iv">OAuth 2.0 (MC Platform)</div></div>
+      <div class="int-item"><div class="il">Cloud</div><div class="iv">Nexis | CloudSpaces</div></div>
+      <div class="int-item"><div class="il">Monitoring</div><div class="iv">SNMP v2c, syslog</div></div>
+    </div>
+  </div>
+
+  <!-- Product grid -->
+  <h2 style="font-family:var(--serif);font-size:clamp(20px,2.5vw,28px);letter-spacing:-.03em;margin:0 0 6px">Product Integration Briefs</h2>
+  <p style="font-size:14px;color:var(--ink4);margin:0 0 8px">Each card covers the integration interface, protocol stack, and known engineering constraints.</p>
+
+  <div class="product-grid">
+
+    <!-- MediaCentral Cloud UX -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Media Operations Platform</span>
+        <h3>MediaCentral | Cloud UX</h3>
+        <p class="dek">Browser-based production platform that aggregates Avid and third-party systems through the MediaCentral Services layer. Replaces the legacy MediaCentral | UX desktop client.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Microservices on Kubernetes. Each service (Search, Assets, Collaborate) runs independently and connects to MediaCentral Bus via AMQP messaging.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">APIs</div>
+            <div class="spec-val">
+              <code>REST v2</code> <code>WebSocket</code> <code>OAuth 2.0</code>
+              — all third-party connectors (Dalet, EVS, Ross) integrate via MC REST v2, not direct database access.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Cloud Deploy</div>
+            <div class="spec-val">AWS and Azure validated via Avid Nexis | CloudSpaces. On-prem Nexis CIFS/NFS volumes are mounted as cloud-tier storage bridges. Bandwidth requirement: 10 Gbps minimum for proxy workflows.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">AI Features</div>
+            <div class="spec-val">MediaCentral | AI (speech-to-text, auto-tagging) adds metadata via REST API back to the MediaCentral index. Runs as a separate licensed service — not bundled with base UX.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>MC Bus service discovery breaks on multi-NIC hosts if the primary NIC is not correctly configured in <code>avid-service-registry.yml</code>. Avid support frequently under-documents NIC binding requirements for containerised deployments.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interplay Production PAM -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Production Asset Management</span>
+        <h3>Interplay | Production (PAM)</h3>
+        <p class="dek">Server-based PAM that manages MXF media assets on Avid Nexis shared storage. Exposes a Windows COM/DCOM API (legacy) and a REST gateway layer introduced in v3.7+.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Windows Server 2019/2022 required for Interplay Engine. No Linux deployment supported as of 2026. Database: Microsoft SQL Server (bundled version — not replaceable).</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">APIs</div>
+            <div class="spec-val">
+              <code>REST v1 (gateway)</code> <code>COM/DCOM (legacy)</code> <code>AAF SDK</code>
+              — External MAMs (Dalet, Grass Valley STRATUS) connect via the REST gateway. Direct COM access requires Windows-side connector service.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Media Format</div>
+            <div class="spec-val">MXF OP-Atom (audio and video in separate files). AAF composition references these atoms. Non-Avid systems reading AAF must resolve MXF atom paths via UNC share — ensure consistent share naming across all workstations.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Cloud Hybrid</div>
+            <div class="spec-val">Interplay Engine cannot run in cloud; only the MediaCentral REST gateway can be cloud-hosted. Full cloud Interplay requires migration to cloud-native MediaCentral | Asset Management (separate product and licence).</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>Interplay checkin/checkout locks are held at the database row level. Third-party connectors that do not explicitly release locks after failed transactions will leave assets in a permanently locked state requiring direct SQL intervention.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Management (Cloud-native) -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Cloud-Native Asset Management</span>
+        <h3>MediaCentral | Asset Management</h3>
+        <p class="dek">Cloud-native successor to Interplay Production. Object-storage backend (S3-compatible) with a GraphQL API replacing the legacy COM/DCOM interface. Currently coexists with Interplay in hybrid deployments.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Containerised microservices on Kubernetes. Asset metadata stored in Elasticsearch; essence in S3-compatible object storage (AWS S3, Azure Blob, or on-prem MinIO).</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">APIs</div>
+            <div class="spec-val">
+              <code>GraphQL</code> <code>REST v2</code> <code>Webhooks</code>
+              — GraphQL schema exposes asset lifecycle events (ingest, version, archive) for real-time third-party integration.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">AI Integration</div>
+            <div class="spec-val">Native connectors for AWS Rekognition and Google Video AI for face recognition and scene classification. Output written to Elasticsearch metadata index. Requires separate Avid AI Services licence.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Migration</span>Migrating from Interplay Production requires running both systems in parallel for 3–6 months. Asset GUID mapping between Interplay's SQL schema and MCAM's Elasticsearch index is not automatic — requires custom ETL pipeline.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iNEWS NRCS -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Newsroom Computer System (NRCS)</span>
+        <h3>Avid iNEWS</h3>
+        <p class="dek">The broadcast industry's dominant NRCS, used by the majority of tier-1 and tier-2 news broadcasters globally. Story-centric architecture where rundowns, scripts, and media assignments are the primary data objects.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">iNEWS Server runs on Windows Server. Custom proprietary file system (iNEWS FTP) exposes story queues as a filesystem hierarchy. No direct REST API on the iNEWS Server — REST access goes through MediaCentral.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Protocols</div>
+            <div class="spec-val">
+              <code>MOS 2.8.5</code> <code>MOS 3.0</code> <code>iNEWS FTP</code> <code>NRCS WebSocket (MC)</code>
+              — Graphics systems (Vizrt, Chyron, Ross) connect via MOS 2.8.5 or 3.0. MOS 3.0 adds runorder sync and direct story-to-graphics binding.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">MOS Integration</div>
+            <div class="spec-val">MOS gateway configuration requires matching MOS client IDs between iNEWS and the graphics/playout system. ID mismatches are the most common integration failure — validate with Avid's MOS configuration diagnostic tool before go-live.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">AI Features</div>
+            <div class="spec-val">Avid AI Marketplace connectors provide script auto-suggest, archive search, and caption generation into iNEWS story fields. Delivered via MediaCentral App Framework — not native to iNEWS Server.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>iNEWS FTP port (21 plain text) is frequently blocked by facility security policies. Integrations that write to iNEWS queues directly (automation systems, AP wire) require explicit firewall rule and iNEWS FTP user configuration — not documented in the default integration guides.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Production Management -->
+    <div class="product-card">
+      <div class="product-card-top"></div>
+      <div class="product-card-body">
+        <span class="product-type">Production Management</span>
+        <h3>Avid Media Composer</h3>
+        <p class="dek">The NLE underpinning Avid's production stack. In networked environments it operates as a client of MediaCentral, checking in and out MXF media from Nexis shared storage rather than accessing local disk.</p>
+        <div class="prod-specs">
+          <div class="spec-row">
+            <div class="spec-label">Architecture</div>
+            <div class="spec-val">Desktop client (Windows / macOS). In Avid Everywhere configuration, Media Composer communicates with Interplay Production Engine via Interplay Client Services (TCP 8321). All asset operations go through the engine — not direct disk access.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">Interchange</div>
+            <div class="spec-val">
+              <code>AAF</code> <code>OMF</code> <code>MXF OP-Atom</code> <code>EDL</code>
+              — AAF with embedded media is used for interchange with DaVinci Resolve and Flame. AAF composition-only (no embedded media) requires matching Nexis mount points on the receiving system.
+            </div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">AI Features</div>
+            <div class="spec-val">ScriptSync (phoneme-based speech alignment for transcript-based editing). SpeakersID (face/voice identification with third-party transcription service). Both require MediaCentral AI Services licence.</div>
+          </div>
+          <div class="spec-row">
+            <div class="spec-label">⚠ Integration Risk</div>
+            <div class="spec-val"><span class="risk-badge">Known</span>Media Composer version must match Interplay Client Services version within a two-release window. Upgrading Media Composer before upgrading Interplay Engine breaks checkout/checkin operations silently — no error dialogue, assets simply fail to check out.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.product-grid -->
+
+  <!-- Author bio -->
+  <div class="art-author-bio" style="margin-top:56px">
+    <div class="bio-avatar">S</div>
+    <div class="bio-body">
+      <strong class="bio-name">Prerak K Mehta</strong>
+      <span class="bio-title">Founder, The Streamic &middot; Dublin, Ireland</span>
+      <p class="bio-text">Broadcast technology professional with total 25+ years of IT and 20 years of Media/Post Production &amp; Broadcast IT systems experience. He covers broadcast engineering, streaming, infrastructure, and media technology trends for The Streamic.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;background:#f5f5f7;border-radius:12px;padding:16px 20px;font-size:13px;color:var(--ink3)">
+    <strong>Editorial Note:</strong> These integration briefs are independently researched and written. No vendor has paid for inclusion or content review.
+    <a href="../editorial-policy.html" style="color:var(--blue);margin-left:6px">Editorial Policy &rarr;</a>
+  </div>
+
+  <div style="margin-top:32px">
+    <a href="../index.html" class="back-nav">&#8592; Back to Home</a>
+  </div>
+
+</div>
+</main>
+
+<footer class="footer"><div class="footer-grid">
+  <div><div class="footer-brand">The Streamic</div>
+    <p class="footer-tag">Independent broadcast &amp; streaming technology journalism.</p>
+  </div>
+  <div class="footer-col"><h4>Coverage</h4>
+    <a href="../ai-post-production.html">AI in Broadcasting</a>
+    <a href="../howto.html">How-To Guides</a>
+    <a href="../index.html">Home</a>
+  </div>
+  <div class="footer-col"><h4>Site</h4>
+    <a href="../about.html">About</a>
+    <a href="../editorial-policy.html">Editorial Policy</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+  </div>
+</div>
+<div class="footer-bottom">
+  <span>&copy; 2026 The Streamic. All rights reserved.</span>
+</div></footer>
+
+<div id="ts-cookie"><div class="cookie-in"><div class="cookie-txt">
+  <strong>We use cookies</strong> <a href="../privacy.html">Privacy Policy</a>
+</div><div class="cookie-btns">
+  <button class="cookie-no" onclick="tsCC(false)">Reject optional</button>
+  <button class="cookie-ok" onclick="tsCC(true)">Accept all</button>
+</div></div></div>
+<script>(function(){var K='ts_cc',s=localStorage.getItem(K),b=document.getElementById('ts-cookie');
+if(!s&&b)b.style.display='block';
+window.tsCC=function(ok){localStorage.setItem(K,ok?'granted':'denied');if(b)b.style.display='none';
+if(typeof gtag!='undefined')gtag('consent','update',{analytics_storage:ok?'granted':'denied',
+ad_storage:ok?'granted':'denied',ad_user_data:ok?'granted':'denied',ad_personalization:ok?'granted':'denied'});};
+if(s==='granted'&&typeof gtag!='undefined')gtag('consent','update',{analytics_storage:'granted',
+ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted'});})();
+</script>
+</body></html>

@@ -1,0 +1,298 @@
+
+=== cleanup.py run @ 2026-04-17 19:27:15Z ===
+KEPT   (31):
+  2026-04-17-ai-post-production-blackmagic-davinci-resolve-21-nab
+  2026-04-17-infrastructure-haivision-falkon-x4-5g-live-sports
+  2026-04-17-newsroom-nab-2026-preview-broadcast-technology
+  2026-04-17-infrastructure-haivision-makito-one-multi-codec-nab-2026
+  2026-04-17-ai-post-production-avid-google-cloud-agentic-ai-media-production
+  2026-04-10-newsroom-bitcentral-to-showcase-connected-media-workfl
+  2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation
+  2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow
+  2026-04-01-newsroom-vizrt-viz-one-ai-metadata-archive-strategy
+  2026-04-01-ai-post-production-editshare-analytical-ai-mediasilo-nab-2026
+  2026-04-01-newsroom-dalet-flex-2512-semantic-search-dalia-ai
+  2026-04-01-cloud-tedial-agentic-ai-media-lifecycle-nab-2026
+  2026-04-01-playout-harmonic-spectrum-x-plus-playout-economics
+  2026-04-01-playout-pebble-future-ready-playout-nab-2026
+  2026-04-01-newsroom-aveco-rundown-designer-no-nrcs-studio-automation
+  2026-04-01-infrastructure-smpte-st2110-ai-media-nab-2026
+  telestream-adobe-vantage-premiere-workflow-integration-2026
+  future-of-ai-in-broadcast-deployment-2026
+  cloud-broadcast-workflows-remote-production-2026
+  ai-video-post-production-editing-vfx-automation-2026
+  ip-broadcasting-smpte-st2110-engineering-guide-2026
+  media-asset-management-ai-era-monetisation-2026
+  live-production-ai-automation-real-time-broadcasting-2026
+  broadcast-automation-systems-guide-2026
+  ai-reducing-broadcast-operational-costs-2026
+  ip-transition-2026-practical-guide-broadcast-engineers
+  cloud-playout-economics-2026-build-vs-buy
+  beyond-the-chatbot-operational-ai-newsroom-2026
+  st-2110-small-market-hybrid-ip-broadcasters-2026
+  c2pa-deepfake-news-credibility-digital-provenance-2026
+  green-broadcast-cloud-carbon-footprint-sustainability-2026
+PURGED (193):
+  2026-04-17-newsroom-vizrt-to-feature-newly-introduced-ai-keyer-at  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-17-newsroom-apex-rf-to-launch-rainier-wireless-camera-tra  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-17-newsroom-streamings-subscription-reset-why-agentic-ai-  [source_domain=TV Technology, gen=openrouter-deepseek-r1]
+  2026-04-17-newsroom-microsoft-previews-2026-nab-show-trends-plans  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-17-newsroom-telos-alliance-introduces-four-new-products-a  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-17-newsroom-atsc-offers-atsc-30-guide-to-2026-nab-show  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-17-newsroom-bittree-returns-to-nab-show-with-diverse-patc  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-17-playout-ai-adoption-for-live-streaming-is-now-a-realit  [source_domain=Harmonic, gen=generate_summaries_groq]
+  2026-04-17-newsroom-weigel-broadcasting-taps-openap-for-advanced-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-17-newsroom-wowza-launches-video-intelligence-framework  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-17-graphics-vitality-x-ewc-nōbl-studio  [source_domain=Motionographer, gen=openrouter-deepseek-r1]
+  2026-04-16-newsroom-scripps-sports-secures-multi-year-rights-to-a  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-16-infrastructu-isr-video-encoding-explained-for-low-late  [source_domain=Haivision, gen=rewrite_feed_local]
+  2026-04-16-newsroom-big-ten-network-expands-super-slo-mo-replay-t  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-14-newsroom-nab-blasts-cta-in-fcc-sports-probe-comments  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-14-streaming-a-year-later-examining-google-media-cdns-evo  [source_domain=Streaming Media Blog, gen=generate_summaries_groq]
+  2026-04-14-cloud-distribute-ndi-content-from-aws-with-aws-element  [source_domain=AWS, gen=generate_summaries_groq]
+  2026-04-14-graphics-geometric-animation-rexmaxstudio  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-04-13-newsroom-sinclair-and-one-media-technologies-outline-n  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-mediaproxy-to-show-ai-powered-logo-visual-ide  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-synamedia-to-feature-quortex-powervu-cloud-na  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-cloud-sinclair-and-one-media-technologies-outline-next  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-opendrives-unveils-edge-a-hybrid-cloud-edge-p  [source_domain=BroadcastBeat, gen=mistral-large]
+  2026-04-13-newsroom-avid-connects-its-news-platforms-with-avid-co  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-nab-show-bridge-technologies-to-highlight-vb4  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-grass-valley-showcases-alliance-ecosystem-at-  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-nab-show-ross-video-to-demonstrate-mxl-and-dy  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-ai-and-next-generation-codecs-are-reshaping-e  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-ross-video-and-highfield-ai-to-deliver-ai-ass  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-newsroom-camera-corps-at-nab-2026-showcasing-advanced-  [source_domain=BroadcastBeat, gen=mistral-large]
+  2026-04-13-streaming-vantage-enhances-iconik-connector-to-enable-  [source_domain=Telestream, gen=mistral-large]
+  2026-04-13-newsroom-mediaproxy-adds-ai-toolset-to-logserver-for-b  [source_domain=BroadcastBeat, gen=mistral-large]
+  2026-04-13-newsroom-harvey-arnold-represents-the-best-of-broadcas  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-13-ai-post-prod-see-eyelines-vfx-breakdown-for-stranger-t  [source_domain=Befores & Afters, gen=mistral-large]
+  2026-04-12-cloud-unlocking-next-generation-audio-production-with-  [source_domain=AWS, gen=generate_summaries_groq]
+  2026-04-10-newsroom-bitcentral-to-feature-connected-media-workflo  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-10-newsroom-nab-show-launches-content-creator-vip-program  [source_domain=TV Technology, gen=mistral-large]
+  2026-04-10-newsroom-2026-nab-show-exhibitor-insight-bitcentral  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-10-newsroom-blackmagic-design-2026-nab-update  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-04-10-newsroom-tag-video-systems-and-oracle-cloud-infrastruc  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-04-10-newsroom-sling-tv-launches-1999-a-month-sling-essentia  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-10-newsroom-study-broadcasters-must-prepare-now-for-impac  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-enco-to-showcase-new-aitrack-capabilities-at-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-09-newsroom-harmonic-to-showcase-newly-enhanced-hybrid-st  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-digitalglue-challenges-ai-fatigue-at-nab-show  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-nab-show-2026-multidyne-to-launch-two-new-pro  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-lawo-to-launch-edge-one-converged-video-audio  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-09-newsroom-proton-expands-minicam-portfolio-with-proton-  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-portland-fire-streaming-platform-launches  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-insync-unveils-advanced-video-processing-and-  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-04-09-newsroom-ltn-unveils-network-enhancements-in-advance-o  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-newsroom-great-american-family-selects-cts-for-channel  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-09-infrastructu-video-wall-installation-best-practices-fo  [source_domain=Haivision, gen=generate_summaries_groq]
+  2026-04-09-ai-post-prod-watch-framestores-vfx-breakdown-for-micke  [source_domain=Befores & Afters, gen=generate_summaries_groq]
+  2026-04-09-graphics-premiere-the-chase-ddd26-opening-titles-by-fl  [source_domain=Motionographer, gen=generate_summaries_groq]
+  2026-04-08-newsroom-smpte-to-host-first-of-its-kind-st-2110-ip-me  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-08-newsroom-nab-show-kokusai-denki-to-feature-new-afforda  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-08-newsroom-kokusai-denki-electric-america-brings-4k-path  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-04-08-newsroom-pliant-to-highlight-new-wireless-intercom-acc  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-08-newsroom-zixi-to-feature-ip-based-alternative-to-satel  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-08-newsroom-media-links-to-focus-on-ip-transport-solution  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-04-08-newsroom-media-links-brings-ultra-resilient-ip-transpo  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-08-newsroom-2026-nab-show-exhibitor-insights-big-blue-mar  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-08-newsroom-pliant-technologies-showcases-expanded-access  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-08-newsroom-scripps-sports-gets-broadcast-rights-tor-nash  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-08-newsroom-analyst-preliminary-injunction-halting-nexsta  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-08-newsroom-telestream-and-mimir-integration-facilitates-  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-08-streaming-telestream-integrates-mpeg-h-audio-to-stream  [source_domain=Telestream, gen=generate_summaries_groq]
+  2026-04-08-graphics-mad-propz-cub-studio  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-04-07-newsroom-cuez-brings-four-new-innovations-to-nab-2026-  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-07-newsroom-neutrik-to-unveil-true1-data-connector-series  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-avid-to-debut-avid-content-core-on-aws-at-202  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-sachtler-to-highlight-latest-aktiv-fsb-mk-ii-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-carrie-healey-joins-nab-as-vice-president-of-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-broadcast-industry-initiatives-promise-to-spe  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-haivision-unveils-makito-one-live-video-contr  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-synamedia-unveils-ai-by-quortex  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-marshall-electronics-unveils-cv376-ndihx3-hdm  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-07-newsroom-34th-annual-broadcastingcable-hall-of-fame-ga  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-manifold-partners-with-nep-group-for-fpga-acc  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-remembering-televisions-role-in-the-us-bicent  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-newsroom-public-media-management-hires-christian-siebe  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-07-streaming-telestream-and-mimir-the-modern-news-workflo  [source_domain=Telestream, gen=mistral-large]
+  2026-04-06-newsroom-jba-announces-details-for-its-pre-nab-2026-ev  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-encompass-techex-to-feature-new-cloud-master-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-nab-show-leans-into-medias-forward-momentum  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-a-new-lvcc-is-ready-to-engage-with-nab-show  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-saranyu-technologies-launches-match-multi-vie  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-06-newsroom-streaming-summit-gets-down-to-business  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-cloud-aws-brings-ai-powered-scale-to-storytellers-at-n  [source_domain=AWS, gen=generate_summaries_groq]
+  2026-04-06-newsroom-ktvj-tv-completes-major-signal-upgrade  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-helping-local-media-outsmart-the-algorithm  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-grass-valley-launches-future-playmakers-progr  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-the-business-model-challenges-of-the-dynamic-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-06-newsroom-ktvj-completes-major-signal-upgrade  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-newsroom-sinclair-to-fcc-broadcast-sports-drives-inves  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-newsroom-2026-nab-show-exhibitor-insight-techex  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-newsroom-ateme-delivers-full-end-to-end-streaming-plat  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-newsroom-public-television-stations-blast-zero-funding  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-newsroom-fcc-plans-spending-regulatory-fee-revenue-red  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-03-graphics-ray-ban-meta-smart-glasses-gismotv  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-04-02-newsroom-playbox-neo-reinforces-mimo-tech-with-new-pla  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-02-newsroom-nab-leadership-foundation-welcomes-new-board-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-02-newsroom-techex-and-encompass-launch-industry-leading-  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-02-newsroom-macnica-redefines-st-2110-flexibility-with-tw  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-02-newsroom-scripps-completes-sale-of-wrtv-to-circle-city  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-02-newsroom-elite-media-technologies-selects-interra-syst  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-02-newsroom-televisaunivision-signs-new-nielsen-media-int  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-02-newsroom-everpass-media-expands-distribution-deal-with  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-02-newsroom-binghamton-university-strengthens-studentrun-  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-02-graphics-le-chant-des-orages-caroline-attia-larivière-  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-04-01-newsroom-nab-show-tag-video-systems-oracle-cloud-infra  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-nab-show-tag-video-systems-oracle-partner-on-  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-2026-nab-show-exhibitor-insight-evertz  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-judge-blocks-order-barring-npr-and-pbs-from-f  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-signiant-scales-outtvs-global-lgbtq-storytell  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-wapa-to-launch-on-dish-dishlatino-sling-tv-an  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-volumetric-video-takes-gold-on-the-live-event  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-04-01-newsroom-professional-wireless-systems-pws-takes-on-in  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-04-01-cloud-live-streaming-localization-and-accessibility-us  [source_domain=AWS, gen=generate_summaries_groq]
+  2026-04-01-infrastructu-isr-video-in-command-centers-for-real-tim  [source_domain=Haivision, gen=rewrite_feed_local]
+  2026-04-01-ai-post-prod-behind-the-scenes-how-google-veo-powers-v  [source_domain=Pond5, gen=rewrite_feed_local]
+  2026-04-01-graphics-in-death-weve-just-begun-ft-poppy-and-son-lux  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-03-31-newsroom-nab-blasts-sports-rights-shift-to-streaming-u  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-newsroom-cuescript-to-focus-on-mobile-simpler-promptin  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-newsroom-cartoni-to-introduce-control-unite-for-liftto  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-newsroom-uk-group-companies-unveil-nab-show-plans  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-newsroom-mrmc-marks-60-years-of-innovation-at-nab-show  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-03-31-newsroom-green-hippo-debuts-hands-on-hippotizer-media-  [source_domain=BroadcastBeat, gen=rewrite_feed_local]
+  2026-03-31-newsroom-spectrum-tv-app-to-launch-on-amazon-fire-tv-d  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-newsroom-fcc-approves-wjax-tv-license-transfer-to-cox  [source_domain=TV Technology, gen=rewrite_feed_local]
+  2026-03-31-graphics-dopaminised-zak-peric  [source_domain=Motionographer, gen=rewrite_feed_local]
+  2026-03-30-newsroom-opendrives-shows-off-sports-expertise-in-spor  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-03-30-newsroom-evs-to-debut-t-motion-robotics-at-2026-nab-sh  [source_domain=TV Technology, gen=mistral-large]
+  2026-03-30-streaming-rethinking-review-eliminating-proxy-bottlene  [source_domain=Telestream, gen=generate_summaries_groq]
+  2026-03-30-streaming-new-codec-data-40-of-respondents-plan-to-dep  [source_domain=Streaming Media Blog, gen=rewrite_feed_local]
+  2026-03-27-ai-post-prod-current-obsession-this-how-to-animate-wat  [source_domain=, gen=rewrite_feed_local]
+  2026-03-26-infrastructu-achieve-perfect-sync-in-every-live-video-  [source_domain=Haivision, gen=rewrite_feed_local]
+  2026-03-25-infrastructu-how-mobile-video-transmitters-are-enhanci  [source_domain=Haivision, gen=mistral-large]
+  2026-03-25-newsroom-bruno-mars-risk-it-all-music-video-captures-t  [source_domain=BroadcastBeat, gen=]
+  2026-03-25-graphics-ask-the-experts-building-your-own-professiona  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-25-graphics-how-vizrt-education-solutions-prepare-student  [source_domain=Vizrt, gen=]
+  2026-03-25-graphics-on-air-2025-a-global-broadcast-powered-by-stu  [source_domain=Vizrt, gen=]
+  2026-03-25-graphics-turning-archives-into-intelligence-vizrt-and-  [source_domain=Vizrt, gen=]
+  2026-03-25-graphics-vizrt-launches-ai-powered-advances-for-speed-  [source_domain=Vizrt, gen=]
+  2026-03-25-graphics-vizrt-launches-sports-production-bundles-to-e  [source_domain=Vizrt, gen=]
+  2026-03-25-newsroom-mnc-software-appoints-heartland-video-systems  [source_domain=BroadcastBeat, gen=]
+  2026-03-25-ai-post-prod-video-project-hail-mary-creature-effects-  [source_domain=Befores & Afters, gen=]
+  2026-03-24-newsroom-witbe-unveil-ai-native-video-streaming-test-m  [source_domain=TV Technology, gen=]
+  2026-03-24-newsroom-witbe-to-unveil-ai-native-testing-and-monitor  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-newsroom-sipmx-launches-at-nab-show-2026-to-democratiz  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-graphics-the-world-of-bosnian-knight-knapstudio-kenan-  [source_domain=Motionographer, gen=]
+  2026-03-24-newsroom-alfalite-returns-to-nab-show-alongside-for-a-  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-newsroom-first-time-exhibitor-ipc-introduces-one-link-  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-newsroom-nep-group-launches-nep-platform-for-software-  [source_domain=TV Technology, gen=]
+  2026-03-24-newsroom-nevion-introduces-powerful-new-panel-builder-  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-newsroom-cinegy-delivers-software-defined-television-f  [source_domain=BroadcastBeat, gen=]
+  2026-03-24-infrastructu-iran-built-a-vast-camera-network-to-contr  [source_domain=SecurityWeek, gen=]
+  2026-03-24-ai-post-prod-samsung-video-wall-acts-as-visual-gateway  [source_domain=AV Magazine, gen=]
+  2026-03-24-graphics-ask-the-experts-building-your-own-professiona  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-24-graphics-how-vizrt-education-solutions-prepare-student  [source_domain=Vizrt, gen=generate_summaries_groq]
+  2026-03-24-graphics-on-air-2025-a-global-broadcast-powered-by-stu  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-24-graphics-turning-archives-into-intelligence-vizrt-and-  [source_domain=Vizrt, gen=generate_summaries_groq]
+  2026-03-24-graphics-vizrt-launches-ai-powered-advances-for-speed-  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-24-graphics-vizrt-launches-sports-production-bundles-to-e  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-23-streaming-intelligent-camera-card-ingest-for-modern-me  [source_domain=Telestream, gen=mistral-large]
+  2026-03-23-ai-post-prod-why-we-chose-a-credit-based-model-for-vid  [source_domain=Pond5, gen=generate_summaries_groq]
+  2026-03-23-newsroom-utah-scientific-to-spotlight-hybrid-sdi-ip-po  [source_domain=TV Technology, gen=mistral-large]
+  2026-03-23-newsroom-study-globally-hbo-max-is-most-widely-bundled  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-03-23-newsroom-are-broadcasters-about-to-be-handed-a-much-ne  [source_domain=TV Technology, gen=mistral-large]
+  2026-03-23-newsroom-fcc-approves-tv-station-license-transfers-to-  [source_domain=TV Technology, gen=generate_summaries_groq]
+  2026-03-23-newsroom-scripps-to-launch-scripps-sports-network-stre  [source_domain=TV Technology, gen=mistral-large]
+  2026-03-23-newsroom-utah-scientific-to-showcase-a-variety-of-hybr  [source_domain=BroadcastBeat, gen=mistral-large]
+  2026-03-23-newsroom-miri-v410-live-4k-encoderdecoder-to-make-nort  [source_domain=BroadcastBeat, gen=generate_summaries_groq]
+  2026-03-23-ai-post-prod-sony-calls-time-on-its-vfx-and-vp-company  [source_domain=AV Magazine, gen=openrouter-deepseek-r1]
+  2026-03-23-graphics-ask-the-experts-building-your-own-professiona  [source_domain=Vizrt, gen=generate_summaries_groq]
+  2026-03-23-graphics-how-vizrt-education-solutions-prepare-student  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-23-graphics-on-air-2025-a-global-broadcast-powered-by-stu  [source_domain=Vizrt, gen=openrouter-deepseek-r1]
+  2026-03-23-graphics-vizrt-launches-ai-powered-advances-for-speed-  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-23-graphics-vizrt-launches-sports-production-bundles-to-e  [source_domain=Vizrt, gen=mistral-large]
+  2026-03-16-streaming-remote-production-perfection-from-cloud-capt  [source_domain=Telestream, gen=rewrite_feed_local]
+  2026-03-16-cloud-how-sony-pictures-networks-india-delivered-perso  [source_domain=AWS, gen=mistral-large]
+  2026-03-12-playout-cloud-native-revolution-harmonic-vos-and-red-h  [source_domain=Harmonic, gen=mistral-large]
+  2026-03-11-infrastructu-top-5-technology-trends-from-haivisions-2  [source_domain=Haivision, gen=rewrite_feed_local]
+  2026-03-06-cloud-how-aws-powers-dramaze-ai-enhanced-streaming-pla  [source_domain=AWS, gen=mistral-large]
+  2026-03-05-cloud-building-intelligent-media-supply-chain-automati  [source_domain=AWS, gen=mistral-large]
+  2026-02-25-cloud-how-aws-built-a-live-ai-powered-vertical-video-c  [source_domain=AWS, gen=rewrite_feed_local]
+  2026-02-19-ai-post-prod-the-beginners-guide-to-ai-video  [source_domain=Jonny Elwyn, gen=rewrite_feed_local]
+  2026-01-30-streaming-the-end-of-business-as-usual-why-2026-is-the  [source_domain=Telestream, gen=rewrite_feed_local]
+  2025-09-02-playout-the-economics-of-hybrid-streaming-architecture  [source_domain=Harmonic, gen=mistral-large]
+  2025-06-09-playout-the-everything-era-what-nab-2025-really-told-u  [source_domain=Harmonic, gen=openrouter-deepseek-r1]
+  2024-09-11-newsroom-avid-stream-io-ingest-playout-solution-now-su  [source_domain=Avid Press Room, gen=rewrite_feed_local]
+  2024-08-29-newsroom-avid-showcases-innovations-at-ibc2024-for-med  [source_domain=Avid Press Room, gen=rewrite_feed_local]
+
+=== cleanup.py run @ 2026-04-19 15:36:10Z ===
+KEPT   (31):
+  2026-04-17-ai-post-production-blackmagic-davinci-resolve-21-nab
+  2026-04-17-infrastructure-haivision-falkon-x4-5g-live-sports
+  2026-04-17-newsroom-nab-2026-preview-broadcast-technology
+  2026-04-17-infrastructure-haivision-makito-one-multi-codec-nab-2026
+  2026-04-17-ai-post-production-avid-google-cloud-agentic-ai-media-production
+  2026-04-10-newsroom-bitcentral-to-showcase-connected-media-workfl
+  2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation
+  2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow
+  2026-04-01-newsroom-vizrt-viz-one-ai-metadata-archive-strategy
+  2026-04-01-ai-post-production-editshare-analytical-ai-mediasilo-nab-2026
+  2026-04-01-newsroom-dalet-flex-2512-semantic-search-dalia-ai
+  2026-04-01-cloud-tedial-agentic-ai-media-lifecycle-nab-2026
+  2026-04-01-playout-harmonic-spectrum-x-plus-playout-economics
+  2026-04-01-playout-pebble-future-ready-playout-nab-2026
+  2026-04-01-newsroom-aveco-rundown-designer-no-nrcs-studio-automation
+  2026-04-01-infrastructure-smpte-st2110-ai-media-nab-2026
+  telestream-adobe-vantage-premiere-workflow-integration-2026
+  future-of-ai-in-broadcast-deployment-2026
+  cloud-broadcast-workflows-remote-production-2026
+  ai-video-post-production-editing-vfx-automation-2026
+  ip-broadcasting-smpte-st2110-engineering-guide-2026
+  media-asset-management-ai-era-monetisation-2026
+  live-production-ai-automation-real-time-broadcasting-2026
+  broadcast-automation-systems-guide-2026
+  ai-reducing-broadcast-operational-costs-2026
+  ip-transition-2026-practical-guide-broadcast-engineers
+  cloud-playout-economics-2026-build-vs-buy
+  beyond-the-chatbot-operational-ai-newsroom-2026
+  st-2110-small-market-hybrid-ip-broadcasters-2026
+  c2pa-deepfake-news-credibility-digital-provenance-2026
+  green-broadcast-cloud-carbon-footprint-sustainability-2026
+PURGED (0):
+
+=== cleanup.py run @ 2026-04-21 19:13:48Z ===
+KEPT   (31):
+  2026-04-17-ai-post-production-blackmagic-davinci-resolve-21-nab
+  2026-04-17-infrastructure-haivision-falkon-x4-5g-live-sports
+  2026-04-17-newsroom-nab-2026-preview-broadcast-technology
+  2026-04-17-infrastructure-haivision-makito-one-multi-codec-nab-2026
+  2026-04-17-ai-post-production-avid-google-cloud-agentic-ai-media-production
+  2026-04-10-newsroom-bitcentral-to-showcase-connected-media-workfl
+  2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation
+  2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow
+  2026-04-01-newsroom-vizrt-viz-one-ai-metadata-archive-strategy
+  2026-04-01-ai-post-production-editshare-analytical-ai-mediasilo-nab-2026
+  2026-04-01-newsroom-dalet-flex-2512-semantic-search-dalia-ai
+  2026-04-01-cloud-tedial-agentic-ai-media-lifecycle-nab-2026
+  2026-04-01-playout-harmonic-spectrum-x-plus-playout-economics
+  2026-04-01-playout-pebble-future-ready-playout-nab-2026
+  2026-04-01-newsroom-aveco-rundown-designer-no-nrcs-studio-automation
+  2026-04-01-infrastructure-smpte-st2110-ai-media-nab-2026
+  telestream-adobe-vantage-premiere-workflow-integration-2026
+  future-of-ai-in-broadcast-deployment-2026
+  cloud-broadcast-workflows-remote-production-2026
+  ai-video-post-production-editing-vfx-automation-2026
+  ip-broadcasting-smpte-st2110-engineering-guide-2026
+  media-asset-management-ai-era-monetisation-2026
+  live-production-ai-automation-real-time-broadcasting-2026
+  broadcast-automation-systems-guide-2026
+  ai-reducing-broadcast-operational-costs-2026
+  ip-transition-2026-practical-guide-broadcast-engineers
+  cloud-playout-economics-2026-build-vs-buy
+  beyond-the-chatbot-operational-ai-newsroom-2026
+  st-2110-small-market-hybrid-ip-broadcasters-2026
+  c2pa-deepfake-news-credibility-digital-provenance-2026
+  green-broadcast-cloud-carbon-footprint-sustainability-2026
+PURGED (0):

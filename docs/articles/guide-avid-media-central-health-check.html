@@ -1,0 +1,192 @@
+<!-- HAND_AUTHORED -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',
+    'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0VSHDN3ZR6"></script>
+  <script>gtag('js',new Date());gtag('config','G-0VSHDN3ZR6');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Avid MediaCentral Health Check: Services, Connections, and Logs | The Streamic</title>
+  <meta name="description" content="Run a full pre-air health check — verify MCPS services, Interplay and iNEWS connections, licensing, and system logs before going on air.">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="The Streamic Editorial Team">
+  <link rel="canonical" href="https://www.thestreamic.in/articles/guide-avid-media-central-health-check.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Streamic">
+  <meta property="og:title" content="Avid MediaCentral Health Check: Services, Connections, and Logs | The Streamic">
+  <meta property="og:description" content="Run a full pre-air health check — verify MCPS services, Interplay and iNEWS connections, licensing, and system logs before going on air.">
+  <meta property="og:url" content="https://www.thestreamic.in/articles/guide-avid-media-central-health-check.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../homepage-layout.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../" class="nav-logo">
+      <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" aria-hidden="true">
+      <div class="nav-logo-text">
+        <span class="nav-logo-name">The Streamic</span>
+        <span class="nav-logo-tagline">Media &amp; Broadcast IT Analysis</span>
+      </div>
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <ul class="nav-links"><li><a href="/">Home</a></li><li><a href="../ai-post-production.html">AI in Broadcasting</a></li><li><a href="../howto.html" class="active">How-To Guides</a></li><li><a href="../post-production-workflows.html">Post Production Workflows</a></li><li><a href="../insights.html">Expert Insights</a></li><li><a href="../editorsdesk.html">Editorial Insights</a></li></ul>
+    <div class="nav-right">
+      <a href="../about.html" class="nav-desk">About</a>
+      <button class="nav-toggle" aria-label="Menu" type="button" onclick="(function(b,m){m.classList.toggle('open');b.setAttribute('aria-expanded',m.classList.contains('open'));document.body.classList.toggle('menu-open',m.classList.contains('open'));})(this,this.closest('nav').querySelector('.nav-mob'))">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-gold" aria-hidden="true"></div>
+  <div class="nav-mob"><a href="/">Home</a><a href="../ai-post-production.html">AI in Broadcasting</a><a href="../howto.html">How-To Guides</a><a href="../post-production-workflows.html">Post Production Workflows</a><a href="../insights.html">Expert Insights</a><a href="../editorsdesk.html">Editorial Insights</a><a href="../about.html">About</a><a href="../contact.html">Contact</a></div>
+</nav>
+<main>
+  <div class="art-wrap">
+    <div class="art-breadcrumb">
+      <a href="../featured.html">Home</a>
+      <span>›</span>
+      <a href="../howto.html" style="color:var(--blue)">How-To Guides</a>
+    </div>
+    <span class="art-tag" style="background:var(--blue)">&#128295; MediaCentral · Admin</span>
+    <h1>Avid MediaCentral Health Check: Services, Connections, and Logs</h1>
+    <p class="art-dek">Run a full pre-air health check — verify MCPS services, Interplay and iNEWS connections, licensing, and system logs before going on air.</p>
+    <div class="art-byline">
+      <strong>The Streamic Editorial Team</strong>
+      <span>&#128337; 7 min read</span>
+      <span style="background:#10b981;color:#fff;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px">How-To Guide</span>
+    </div>
+    <div class="art-body">
+<h2>Why pre-air health checks matter</h2>
+<p>MediaCentral is a stack of interlocking services: MongoDB for user/session data, Elasticsearch for search, a WebSocket service for real-time UI, the MCPS media proxy server, plus bridges to Interplay and iNEWS. Any one can fail silently — the UI stays up while the feature behind it returns errors. A disciplined 15-minute health check before each live newscast catches 80% of production-breaking issues before they break anything.</p>
+<h2>Service status check</h2>
+<p>SSH to the MCS master node and run <code>mc-status</code> (Avid ships this). Every service should report &quot;running&quot; and &quot;healthy&quot;. Red flags: <code>avid-ics</code> listed but not responding, MongoDB replica set out of sync, Elasticsearch cluster status &quot;yellow&quot; (usable) or &quot;red&quot; (degraded search). For a cluster, repeat on every node — split-brain is a common Friday-evening failure mode.</p>
+<h2>Interplay / MediaCentral Production Services</h2>
+<p>From the admin UI, check <strong>System &gt; Integrations &gt; Interplay</strong>. The connection should show &quot;Connected&quot; and the last heartbeat within the last 60 seconds. Common failure: certificate expired, visible as authentication failure in <code>/opt/avid/logs/interplay-bridge.log</code>. Rotate the cert per Avid&#39;s published procedure; don&#39;t wait for the production outage.</p>
+<h2>iNEWS and MOS connections</h2>
+<p>For newsrooms, iNEWS is the heartbeat. In MediaCentral admin, confirm iNEWS appears under <strong>NRCS Integrations</strong> and shows &quot;Active&quot;. Test by opening a rundown in MediaCentral — it should render story list within 2 seconds. Slower than that and the MOS Gateway needs inspection. Check <code>/opt/avid/logs/mos-gateway.log</code> for timeout warnings; if present, the upstream iNEWS server may be under load.</p>
+<h2>Licensing</h2>
+<p>Check licensing under <strong>System &gt; Licensing</strong>. Expired or near-expiry licenses (within 30 days) should trigger a ticket to Avid. Concurrent-use licenses should show usage below ceiling; if you&#39;re regularly hitting 90%+ of concurrent seats, plan a licence top-up before the next big show.</p>
+<h2>Log review</h2>
+<p>Last step: scan the last 24 hours of logs for ERROR and CRITICAL entries. Useful commands: <code>journalctl --since &quot;24 hours ago&quot; -p err</code> at OS level, plus <code>grep -i error /opt/avid/logs/*.log | tail -50</code> for MediaCentral specifics. Common ignorables: WebSocket disconnect/reconnect cycles from flaky browsers. Real concerns: repeated MongoDB connection errors, MCPS transcode failures, or Interplay authentication loops.</p>
+<h2>Automate the health check</h2>
+<p>Once your manual health check procedure is reliable and well-documented, automate it. A small shell script running <code>mc-status</code>, performing <code>curl</code> probes of key MediaCentral endpoints, checking service PID files, and scanning the last hour of log files for new ERROR entries can run every 5 minutes via cron and post its results to a monitoring dashboard like Grafana or Datadog. The human pre-air check then becomes a 2-minute glance at the dashboard rather than a 15-minute manual ritual. Set alert thresholds generously — an Elasticsearch yellow status for 10 minutes is fine, 60 minutes is not. Tune thresholds over time based on your specific environment&#39;s normal noise level. Most facilities find that within 3 months the automated check catches real problems 10-20 minutes earlier than humans would. Document every incident fully including symptoms, diagnostic steps, and resolution so institutional knowledge doesn&#39;t walk out the door when engineers change jobs. MediaCentral troubleshooting is the kind of skill that takes months to build and weeks to lose if not actively maintained through regular health-check discipline.</p>
+
+    </div>
+    <div class="art-author">
+      <strong>About this guide</strong>
+      Written by The Streamic Editorial Team. Practical broadcast and post-production workflow guide for engineers and media operations teams.
+      <a href="/about.html" style="color:var(--blue);margin-left:6px;">About The Streamic &rarr;</a>
+    </div>
+    <div class="art-more">
+      <h3>More How-To Guides</h3>
+      <a href="../howto.html">&#128295; All How-To Guides</a>
+      <a href="../featured.html">&#11088; Featured Stories</a>
+    </div>
+  </div>
+</main>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Avid MediaCentral Health Check: Services, Connections, and Logs",
+  "description": "Run a full pre-air health check \u2014 verify MCPS services, Interplay and iNEWS connections, licensing, and system logs before going on air.",
+  "datePublished": "2026-01-15",
+  "dateModified": "2026-01-15",
+  "author": {
+    "@type": "Organization",
+    "name": "The Streamic Editorial Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "The Streamic",
+    "url": "https://www.thestreamic.in",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.thestreamic.in/assets/logo.png"
+    }
+  },
+  "mainEntityOfPage": "https://www.thestreamic.in/articles/guide-avid-media-central-health-check.html"
+}</script>
+<footer class="footer">
+  <div class="footer-gold" aria-hidden="true"></div>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">The Streamic</div>
+      <div class="footer-tagline">Media &amp; Broadcast IT Analysis</div>
+      <p class="footer-tag">Independent broadcast &amp; streaming technology journalism. Original analysis for engineers and media professionals.</p>
+      <div class="footer-social">
+        <a href="https://twitter.com/thestreamic" target="_blank" rel="noopener noreferrer" class="footer-social-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          @thestreamic
+        </a>
+        <a href="https://www.linkedin.com/company/thestreamic" target="_blank" rel="noopener noreferrer" class="footer-social-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          TheStreamic
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Coverage</h4>
+      <a href="../ai-post-production.html">AI in Broadcasting</a>
+      <a href="../howto.html">How-To Guides</a>
+      <a href="../post-production-workflows.html">Post Production Workflows</a>
+      <a href="../insights.html">Expert Insights</a>
+      <a href="../editorsdesk.html">Editorial Insights</a>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../editorial-policy.html">Editorial Policy</a>
+      <a href="../privacy.html">Privacy Policy</a>
+      <a href="../terms.html">Terms of Use</a>
+    </div>
+    <div class="footer-col">
+      <h4>Dublin, Ireland</h4>
+      <a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a>
+      <span style="font-size:12px;color:#bbb;display:block;margin-top:4px">Adamstown, Lucan</span>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 The Streamic &mdash; thestreamic.in</span>
+    <span>All trademarks belong to their respective owners.</span>
+  </div>
+</footer>
+<div id="ts-cookie">
+  <div class="cookie-in">
+    <div class="cookie-txt">
+      <strong>We use cookies</strong>
+      Analytics cookies help us understand site performance. Optional advertising cookies are disabled until future activation.
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+    <div class="cookie-btns">
+      <button class="cookie-no" onclick="tsCC(false)">Reject optional</button>
+      <button class="cookie-ok" onclick="tsCC(true)">Accept all</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var K='ts_cc',s=localStorage.getItem(K),b=document.getElementById('ts-cookie');
+  if(!s&&b)b.style.display='block';
+  window.tsCC=function(ok){
+    localStorage.setItem(K,ok?'granted':'denied');
+    if(b)b.style.display='none';
+    if(typeof gtag!='undefined')gtag('consent','update',{
+      analytics_storage:ok?'granted':'denied',ad_storage:'denied',
+      ad_user_data:'denied',ad_personalization:'denied'});
+  };
+  if(s==='granted'&&typeof gtag!='undefined')gtag('consent','update',{
+    analytics_storage:'granted',ad_storage:'denied',
+    ad_user_data:'denied',ad_personalization:'denied'});
+})();
+</script>
+</body>
+</html>

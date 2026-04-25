@@ -1,0 +1,78 @@
+{
+  "cat_pools": {
+    "streaming": [
+      "photo-1611532736597-de2d4265fba3",
+      "photo-1586788680434-30d324b2d46f",
+      "photo-1558618047-3c8d4483a6b1",
+      "photo-1560472355-536de3962603",
+      "photo-1507146426996-ef05306b995a",
+      "photo-1620912189867-09e2b0fb4e67"
+    ],
+    "cloud": [
+      "photo-1451187580459-43490279c0fa",
+      "photo-1544197150-b99a580bb7a8",
+      "photo-1558494949-ef010cbdcc31",
+      "photo-1573164713988-8665fc963095",
+      "photo-1504384308090-c894fdcc538d",
+      "photo-1517694712202-14dd9538aa97"
+    ],
+    "ai-post-production": [
+      "photo-1677442135703-1787eea5ce01",
+      "photo-1620712943543-bcc4688e7485",
+      "photo-1535016120720-40c646be5580",
+      "photo-1605106702734-205df224ecce",
+      "photo-1581092918056-0c4c3acd3789",
+      "photo-1593642632559-0c6d3fc62b89"
+    ],
+    "graphics": [
+      "photo-1504639725590-34d0984388bd",
+      "photo-1547658719-da2b51169166",
+      "photo-1620641788421-7a1c342ea42e",
+      "photo-1561736778-92e52a7769ef",
+      "photo-1551288049-bebda4e38f71",
+      "photo-1585829365295-ab7cd400c167"
+    ],
+    "playout": [
+      "photo-1478737270239-2f02b77fc618",
+      "photo-1598488035139-bdbb2231ce04",
+      "photo-1524253482453-3fed8d2fe12b",
+      "photo-1616401784845-180882ba9ba8",
+      "photo-1611532736597-de2d4265fba3",
+      "photo-1560472355-536de3962603"
+    ],
+    "infrastructure": [
+      "photo-1558494949-ef010cbdcc31",
+      "photo-1545987796-200677ee1011",
+      "photo-1544197150-b99a580bb7a8",
+      "photo-1451187580459-43490279c0fa",
+      "photo-1497366754035-f200968a6e72",
+      "photo-1573164713988-8665fc963095"
+    ],
+    "newsroom": [
+      "photo-1504711434969-e33886168f5c",
+      "photo-1585829365295-ab7cd400c167",
+      "photo-1453738773917-9c3eff1db985",
+      "photo-1495020689067-958852a7765e",
+      "photo-1557804506-669a67965ba0",
+      "photo-1432821596592-e2c18b78144f"
+    ],
+    "featured": [
+      "photo-1598488035139-bdbb2231ce04",
+      "photo-1478737270239-2f02b77fc618",
+      "photo-1544197150-b99a580bb7a8",
+      "photo-1558494949-ef010cbdcc31",
+      "photo-1451187580459-43490279c0fa",
+      "photo-1504711434969-e33886168f5c"
+    ]
+  },
+  "_notes": {
+    "streaming": "video encoding workstations, streaming racks, server rooms",
+    "cloud": "data centers, cloud server arrays, network infrastructure",
+    "ai-post-production": "AI neural networks, editing suites, post-production monitors",
+    "graphics": "motion graphics workstations, design screens, color grading",
+    "playout": "broadcast control rooms, playout servers, master control",
+    "infrastructure": "data center racks, fiber optic cabling, network switches",
+    "newsroom": "news studio, newsroom desks, journalism workstations",
+    "featured": "broadcast studios, transmission equipment, media technology"
+  }
+}

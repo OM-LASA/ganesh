@@ -1,0 +1,30 @@
+STREAMIC FINAL FIXED PACKAGE
+============================
+
+WHAT IS INCLUDED
+- 10 new premium article HTML files
+- cleaned high-quality live article set
+- homepage section renamed to: The Streamic Intelligence
+- mobile hamburger menu refined
+- contact form changed from broken mailto flow to FormSubmit
+- build.py and scripts/build.py updated so future rebuilds keep the fixes
+- root + docs pages included for easy overwrite
+
+HOW TO INSTALL
+1. Unzip this package.
+2. Open your Streamic repo folder.
+3. Copy EVERYTHING from this package into your repo root.
+4. Choose REPLACE / OVERWRITE ALL when asked.
+5. Commit and push to GitHub.
+
+IMPORTANT FOR CONTACT FORM
+- The contact form now posts to FormSubmit using technodate3@gmail.com.
+- On the first real submission, FormSubmit will send a one-time activation email.
+- Open that email and confirm once.
+- After that, future form messages will go directly to your inbox.
+
+QUICK TEST AFTER DEPLOY
+1. Open homepage on mobile and test hamburger menu.
+2. Open Contact page and submit a test message.
+3. Confirm the one-time FormSubmit activation email if it appears.
+4. Open 2-3 article pages and verify images / layout.

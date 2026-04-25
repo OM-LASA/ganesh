@@ -1,0 +1,91 @@
+name: Cleanup — Editorial Corpus Maintenance
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ONE-CLICK CONTENT PURGE
+# ═══════════════════════════════════════════════════════════════════════════
+# HOW TO USE:
+#   1. Go to GitHub → your repo → "Actions" tab
+#   2. Click "Cleanup — Editorial Corpus Maintenance" in the left sidebar
+#   3. Click "Run workflow" (top right)
+#   4. LEAVE "mode" as "dry-run" the first time → click Run
+#   5. Check the run logs to see what WOULD be deleted
+#   6. If it looks right, run it again with mode = "execute"
+#   7. Done. Site will rebuild automatically.
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run (preview) or execute (commit)"
+        required: true
+        default: "dry-run"
+        type: choice
+        options:
+          - "dry-run"
+          - "execute"
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Run cleanup script
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify cleanup.py exists
+        run: |
+          if [ ! -f cleanup.py ]; then
+            echo "❌ cleanup.py not found in repo root!"
+            echo "   Please commit cleanup.py to the repo first."
+            exit 1
+          fi
+          echo "✓ cleanup.py found"
+
+      - name: Run cleanup (DRY-RUN)
+        if: github.event.inputs.mode == 'dry-run'
+        run: |
+          echo "════════════════════════════════════════════════════════════"
+          echo "  DRY-RUN MODE — nothing will be deleted"
+          echo "════════════════════════════════════════════════════════════"
+          python3 cleanup.py
+
+      - name: Run cleanup (EXECUTE)
+        if: github.event.inputs.mode == 'execute'
+        run: |
+          echo "════════════════════════════════════════════════════════════"
+          echo "  EXECUTE MODE — files WILL be deleted"
+          echo "════════════════════════════════════════════════════════════"
+          python3 cleanup.py --execute
+
+      - name: Commit changes
+        if: github.event.inputs.mode == 'execute'
+        run: |
+          git config user.name  "Streamic Bot"
+          git config user.email "technodate3@gmail.com"
+
+          git add -A data/ docs/articles/ cleanup-audit.log 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "ℹ  No changes to commit — cleanup may have already been run."
+          else
+            git commit -m "cleanup: editorial-only corpus maintenance [skip ci]"
+            git push origin main
+            echo "✅ Cleanup committed and pushed."
+            echo ""
+            echo "NEXT STEP: Go to Actions → 'The Streamic — Manual Build'"
+            echo "           → Run workflow, to rebuild the site."
+          fi

@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Streamic · Editorial Control Room</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.0/tinymce.min.js" referrerpolicy="origin"></script>
+<style>
+:root {
+  --bg:       #0f1117;
+  --bg2:      #161820;
+  --bg3:      #1c1f2a;
+  --surface:  #22252f;
+  --surface2: #2a2d38;
+  --line:     #2e3140;
+  --line2:    #383b48;
+  --ink:      #e8eaef;
+  --ink2:     #b0b5c3;
+  --ink3:     #7d8294;
+  --ink4:     #5a5f72;
+  --blue:     #5b8def;
+  --blue2:    #4070d6;
+  --green:    #34d399;
+  --green2:   #10b981;
+  --amber:    #fbbf24;
+  --red:      #f87171;
+  --cyan:     #22d3ee;
+  --sans:     'DM Sans', -apple-system, sans-serif;
+  --serif:    'Source Serif 4', Georgia, serif;
+  --mono:     'JetBrains Mono', ui-monospace, monospace;
+  --r:        8px;
+  --r2:       12px;
+  --shadow:   0 4px 24px rgba(0,0,0,.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; overflow: hidden }
+body { font-family: var(--sans); background: var(--bg); color: var(--ink); font-size: 13px }
+
+/* ─── LOCK SCREEN ─── */
+#lock { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999 }
+.lock-card { width: 360px; text-align: center }
+.lock-card h1 { font-family: var(--serif); font-size: 28px; font-weight: 700; letter-spacing: -.5px; margin-bottom: 4px }
+.lock-card .sub { color: var(--ink3); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 32px }
+.lock-card input { width: 100%; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); color: var(--ink); font-size: 14px; text-align: center; letter-spacing: 2px }
+.lock-card input:focus { outline: none; border-color: var(--blue) }
+.lock-card button { width: 100%; margin-top: 12px; padding: 11px; background: var(--blue); color: #fff; border: 0; border-radius: var(--r); font-weight: 600; cursor: pointer; font-size: 13px }
+.lock-card .hint { margin-top: 16px; font-size: 11px; color: var(--ink4) }
+
+/* ─── CHROME ─── */
+.topbar { display: flex; align-items: center; height: 48px; padding: 0 16px; background: var(--bg2); border-bottom: 1px solid var(--line); gap: 12px }
+.topbar .brand { font-family: var(--serif); font-size: 15px; font-weight: 700; color: var(--ink); white-space: nowrap }
+.topbar .brand em { font-style: normal; color: var(--blue); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-left: 8px }
+.topbar .sep { width: 1px; height: 20px; background: var(--line) }
+.topbar .tabs { display: flex; gap: 2px }
+.topbar .tab { padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--ink3); cursor: pointer; border-radius: 6px; border: 0; background: transparent }
+.topbar .tab:hover { color: var(--ink2); background: var(--surface) }
+.topbar .tab.active { color: var(--ink); background: var(--surface2) }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 10px }
+.topbar .pill { font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600 }
+.topbar .pill.ok { background: rgba(52,211,153,.12); color: var(--green) }
+.topbar .pill.warn { background: rgba(251,191,36,.12); color: var(--amber) }
+.topbar .pill.err { background: rgba(248,113,113,.12); color: var(--red) }
+.topbar .btn-sm { font-size: 11px; padding: 4px 10px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink3); cursor: pointer }
+.topbar .btn-sm:hover { border-color: var(--ink3); color: var(--ink) }
+
+/* ─── PANELS ─── */
+.panels { display: grid; height: calc(100vh - 48px); overflow: hidden }
+.panels[data-view="feeds"]   { grid-template-columns: 340px 1fr }
+.panels[data-view="compose"] { grid-template-columns: 1fr }
+.panels[data-view="review"]  { grid-template-columns: 1fr }
+
+/* ─── SIDEBAR (FEEDS) ─── */
+.sidebar { background: var(--bg2); border-right: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden }
+.sb-header { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0 }
+.sb-header .row { display: flex; justify-content: space-between; align-items: center }
+.sb-header h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--ink3) }
+.sb-header .cnt { font-size: 10px; color: var(--ink4) }
+.sb-filters { display: flex; flex-wrap: wrap; gap: 4px }
+.chip { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); color: var(--ink3); cursor: pointer; white-space: nowrap }
+.chip:hover { border-color: var(--ink4) }
+.chip.on { background: var(--blue); border-color: var(--blue); color: #fff }
+.feed-list { flex: 1; overflow-y: auto; overflow-x: hidden }
+.fi { padding: 10px 14px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background .1s }
+.fi:hover { background: var(--bg3) }
+.fi.sel { background: var(--surface2); border-left: 3px solid var(--blue); padding-left: 11px }
+.fi .top { display: flex; gap: 6px; font-size: 10px; color: var(--ink4); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px }
+.fi .top .src { color: var(--cyan); font-weight: 600 }
+.fi .ttl { font-size: 12px; line-height: 1.45; color: var(--ink2); font-weight: 500 }
+.fi.sel .ttl { color: var(--ink) }
+
+/* ─── MAIN AREA ─── */
+.main { display: flex; flex-direction: column; overflow: hidden }
+.main-header { padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; align-items: center; gap: 16px; flex-shrink: 0 }
+.main-header h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink3) }
+.main-header .actions { margin-left: auto; display: flex; gap: 8px }
+.btn { font-size: 12px; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink2); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap }
+.btn:hover { border-color: var(--ink4); color: var(--ink) }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff }
+.btn.primary:hover { background: var(--blue2) }
+.btn.success { background: var(--green2); border-color: var(--green2); color: #fff }
+.btn.danger { background: var(--red); border-color: var(--red); color: #fff }
+.btn:disabled { opacity: .4; pointer-events: none }
+
+/* ─── SPLIT VIEW ─── */
+.split { display: grid; grid-template-rows: 1fr 1fr; flex: 1; overflow: hidden }
+.split.single { grid-template-rows: 1fr }
+.pane { display: flex; flex-direction: column; overflow: hidden; border-bottom: 1px solid var(--line) }
+.pane:last-child { border-bottom: 0 }
+.pane-head { padding: 8px 20px; background: var(--bg3); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; flex-shrink: 0; min-height: 38px }
+.pane-head .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink4) }
+.pane-head .actions { margin-left: auto; display: flex; gap: 6px }
+.pane-body { flex: 1; overflow: auto; padding: 0 }
+.pane-body iframe { width: 100%; height: 100%; border: 0 }
+
+/* ─── EMPTY STATE ─── */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 40px }
+.empty h4 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 8px; color: var(--ink2) }
+.empty p { font-size: 13px; color: var(--ink4); line-height: 1.6; max-width: 400px }
+
+/* ─── GEMINI ASSIST SCREEN ─── */
+.gemini-flow { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: 100%; overflow: hidden }
+.gemini-col { display: flex; flex-direction: column; overflow: hidden }
+.gemini-col:first-child { border-right: 1px solid var(--line) }
+.gemini-col .col-head { padding: 10px 18px; background: var(--bg3); border-bottom: 1px solid var(--line); flex-shrink: 0 }
+.gemini-col .col-head h4 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink4); margin-bottom: 2px }
+.gemini-col .col-head p { font-size: 11px; color: var(--ink3) }
+.gemini-col .col-body { flex: 1; overflow-y: auto; padding: 16px 18px }
+.copy-block { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; margin-bottom: 12px }
+.copy-block pre { font-family: var(--mono); font-size: 11.5px; line-height: 1.6; color: var(--ink2); white-space: pre-wrap; word-break: break-word }
+.copy-block .copy-btn { position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--line); color: var(--ink3); cursor: pointer }
+.copy-block .copy-btn:hover { color: var(--ink); border-color: var(--ink3) }
+.copy-block .copy-btn.copied { background: var(--green2); color: #fff; border-color: var(--green2) }
+.paste-area { width: 100%; min-height: 300px; background: var(--surface); border: 1px dashed var(--line2); border-radius: var(--r); padding: 14px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--ink); resize: vertical }
+.paste-area:focus { outline: none; border-color: var(--blue); border-style: solid }
+.paste-area::placeholder { color: var(--ink4) }
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 11px; font-weight: 700; margin-right: 8px; flex-shrink: 0 }
+.step-row { display: flex; align-items: flex-start; margin-bottom: 14px; font-size: 12px; color: var(--ink2); line-height: 1.5 }
+
+/* ─── EDITOR META ─── */
+.ed-meta { padding: 12px 20px; background: var(--bg2); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr 160px 1fr 1fr; gap: 10px; flex-shrink: 0 }
+.ed-meta label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--ink4); margin-bottom: 3px }
+.ed-meta input, .ed-meta select { width: 100%; padding: 6px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; color: var(--ink); font-size: 12px }
+.ed-meta select { appearance: auto }
+
+/* ─── LOG ─── */
+#log { position: fixed; bottom: 12px; right: 12px; width: 340px; max-height: 200px; overflow-y: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 12px; font-family: var(--mono); font-size: 10px; line-height: 1.5; z-index: 800; box-shadow: var(--shadow) }
+#log .e { margin-bottom: 3px; color: var(--ink3) }
+#log .e.ok { color: var(--green) }
+#log .e.err { color: var(--red) }
+#log .e.info { color: var(--cyan) }
+
+/* ─── SETTINGS MODAL ─── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 5000 }
+.modal-bg.show { display: flex }
+.modal { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--r2); padding: 24px 28px; width: 440px; box-shadow: var(--shadow) }
+.modal h2 { font-size: 16px; margin-bottom: 16px; font-weight: 600 }
+.modal label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--ink4); margin-top: 14px; margin-bottom: 4px }
+.modal input { width: 100%; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; color: var(--ink); font-family: var(--mono); font-size: 12px }
+.modal .help { font-size: 10px; color: var(--ink4); margin-top: 3px; line-height: 1.4 }
+.modal-foot { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end }
+
+/* ─── WORD COUNT BAR ─── */
+.wc-bar { padding: 6px 20px; background: var(--bg3); border-top: 1px solid var(--line); font-size: 11px; color: var(--ink4); display: flex; gap: 16px; flex-shrink: 0 }
+.wc-bar .metric b { color: var(--ink2) }
+
+/* ─── CONFIDENCE ─── */
+.conf-badge { font-size: 10px; padding: 2px 7px; border-radius: 8px; font-weight: 600 }
+.conf-badge.high { background: rgba(52,211,153,.12); color: var(--green) }
+.conf-badge.mid { background: rgba(251,191,36,.12); color: var(--amber) }
+.conf-badge.low { background: rgba(248,113,113,.12); color: var(--red) }
+
+/* ─── TINYMCE DARK ─── */
+.tox-tinymce { border: 0 !important; border-radius: 0 !important }
+.tox .tox-toolbar { background: var(--bg3) !important; border-bottom: 1px solid var(--line) !important }
+.tox .tox-edit-area { background: var(--surface) !important }
+#editor-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px }
+::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px }
+::-webkit-scrollbar-thumb:hover { background: var(--ink4) }
+</style>
+  <meta name="google-adsense-account" content="ca-pub-8033069131874524">
+</head>
+<body>
+
+<!-- ═══ LOCK SCREEN ═══ -->
+<div id="lock">
+  <div class="lock-card">
+    <h1>The Streamic</h1>
+    <div class="sub">Editorial Control Room</div>
+    <input type="password" id="lock-pass" placeholder="Passphrase" autofocus>
+    <button onclick="unlock()">Unlock</button>
+    <div class="hint">First visit? Leave blank and press Enter to set up.</div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none;height:100%;display:none;flex-direction:column">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">The Streamic <em>Control Room</em></div>
+  <div class="sep"></div>
+  <div class="tabs">
+    <button class="tab active" data-view="feeds" onclick="switchView('feeds')">Source Feed</button>
+    <button class="tab" data-view="compose" onclick="switchView('compose')">Gemini Assist</button>
+    <button class="tab" data-view="review" onclick="switchView('review')">Review &amp; Publish</button>
+  </div>
+  <div class="right">
+    <span class="pill ok" id="status">Ready</span>
+    <button class="btn-sm" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</div>
+
+<!-- ═══ VIEW: SOURCE FEED ═══ -->
+<div class="panels" id="view-feeds" data-view="feeds">
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="row">
+        <h2>Source Feed</h2>
+        <span class="cnt" id="feed-count">—</span>
+      </div>
+      <div class="sb-filters" id="filters"></div>
+    </div>
+    <div class="feed-list" id="feed-list"></div>
+  </aside>
+  <div class="main">
+    <div class="main-header">
+      <h3>📄 Source Preview</h3>
+      <span id="source-label" style="font-size:11px;color:var(--ink4)"></span>
+      <div class="actions">
+        <button class="btn" id="btn-newtab" onclick="openInTab()" disabled>↗ Open in tab</button>
+        <button class="btn primary" id="btn-prepare" onclick="prepareForGemini()" disabled>→ Prepare for Gemini</button>
+      </div>
+    </div>
+    <div class="split single">
+      <div class="pane">
+        <div class="pane-body" id="source-body">
+          <div class="empty">
+            <h4>No source selected</h4>
+            <p>Pick an RSS item from the sidebar to preview. Review the source, then click "Prepare for Gemini" to begin the editorial workflow.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VIEW: GEMINI ASSIST ═══ -->
+<div class="panels" id="view-compose" data-view="compose" style="display:none">
+  <div class="main">
+    <div class="main-header">
+      <h3>🧠 Gemini Assist</h3>
+      <span style="font-size:11px;color:var(--ink4)">Manual AI-assisted summarisation — you control the quality</span>
+      <div class="actions">
+        <button class="btn" onclick="switchView('feeds')">← Back to feeds</button>
+        <button class="btn primary" id="btn-to-review" onclick="moveToReview()" disabled>→ Move to Review</button>
+      </div>
+    </div>
+    <div class="gemini-flow" style="flex:1;overflow:hidden">
+      <!-- LEFT: Copy to Gemini -->
+      <div class="gemini-col">
+        <div class="col-head">
+          <h4>Step 1 — Copy to Gemini Desktop</h4>
+          <p>Copy each block below, paste into <a href="https://gemini.google.com/" target="_blank" rel="noopener" style="color:var(--cyan)">gemini.google.com</a></p>
+        </div>
+        <div class="col-body">
+          <div class="step-row"><span class="step-badge">1</span> <span>Copy the <strong>prompt</strong> below and paste it into Gemini as your first message.</span></div>
+          <div class="copy-block" id="cb-prompt">
+            <button class="copy-btn" onclick="copyBlock('cb-prompt')">Copy</button>
+            <pre id="prompt-text"></pre>
+          </div>
+          <div class="step-row"><span class="step-badge">2</span> <span>Copy the <strong>source text</strong> below and paste it as a follow-up message (or append to the prompt).</span></div>
+          <div class="copy-block" id="cb-source">
+            <button class="copy-btn" onclick="copyBlock('cb-source')">Copy</button>
+            <pre id="source-text" style="max-height:400px;overflow-y:auto"></pre>
+          </div>
+          <div class="step-row"><span class="step-badge">3</span> <span>Wait for Gemini to respond. Review the output for accuracy. Then copy Gemini's entire response.</span></div>
+        </div>
+      </div>
+      <!-- RIGHT: Paste from Gemini -->
+      <div class="gemini-col">
+        <div class="col-head">
+          <h4>Step 2 — Paste Gemini's Response</h4>
+          <p>Paste the AI-generated article HTML here. It will be validated before moving to review.</p>
+        </div>
+        <div class="col-body">
+          <textarea class="paste-area" id="gemini-output" placeholder="Paste Gemini's response here…
+
+The output should contain <h2> sections and <p> paragraphs.
+Raw text (no HTML) is also accepted — it will be auto-wrapped in <p> tags."></textarea>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn primary" onclick="validateGeminiOutput()">Validate &amp; Preview</button>
+            <span id="validate-result" style="font-size:11px;color:var(--ink4)"></span>
+          </div>
+          <div id="gemini-preview" style="margin-top:16px;display:none">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink4);margin-bottom:8px">Preview</div>
+            <div id="gemini-preview-body" style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;font-family:var(--serif);font-size:14px;line-height:1.7;color:var(--ink2);max-height:300px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VIEW: REVIEW & PUBLISH ═══ -->
+<div class="panels" id="view-review" data-view="review" style="display:none">
+  <div class="main">
+    <div class="main-header">
+      <h3>✏️ Review &amp; Publish</h3>
+      <div class="actions">
+        <button class="btn" onclick="switchView('compose')">← Back to Gemini</button>
+        <button class="btn" onclick="saveDraft()">💾 Save Draft</button>
+        <button class="btn" onclick="loadDraft()">📂 Load Draft</button>
+        <button class="btn success" id="btn-publish" onclick="publishArticle()">📤 Publish to Streamic</button>
+      </div>
+    </div>
+    <div class="ed-meta">
+      <div>
+        <label>Slug</label>
+        <input type="text" id="m-slug" placeholder="2026-04-15-newsroom-…">
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="m-cat">
+          <option value="ai-post-production">ai-post-production</option>
+          <option value="newsroom" selected>newsroom</option>
+          <option value="cloud">cloud</option>
+          <option value="infrastructure">infrastructure</option>
+          <option value="streaming">streaming</option>
+          <option value="playout">playout</option>
+          <option value="graphics">graphics</option>
+        </select>
+      </div>
+      <div>
+        <label>Title</label>
+        <input type="text" id="m-title" placeholder="Headline">
+      </div>
+      <div>
+        <label>Source URL</label>
+        <input type="text" id="m-src" placeholder="https://…">
+      </div>
+    </div>
+    <div id="editor-wrap">
+      <textarea id="editor"></textarea>
+    </div>
+    <div class="wc-bar">
+      <span class="metric">Words: <b id="wc-count">0</b></span>
+      <span class="metric">Sections: <b id="wc-sections">0</b></span>
+      <span class="metric">Model: <b id="wc-model">Gemini Desktop</b></span>
+      <span class="metric">Source: <b id="wc-source">—</b></span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <h2>Control Room Settings</h2>
+    <label>GitHub Personal Access Token</label>
+    <input type="password" id="s-token" placeholder="ghp_…">
+    <div class="help">Needs <code>repo</code> + <code>workflow</code> scope. Used to trigger the publish workflow.</div>
+    <label>GitHub Repository</label>
+    <input type="text" id="s-repo" placeholder="Thestreamic/Streamic-OMS">
+    <label>Change Passphrase</label>
+    <input type="password" id="s-pass" placeholder="New passphrase (leave blank to keep current)">
+    <div class="modal-foot">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="log"></div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════════════════
+//  STREAMIC EDITORIAL CONTROL ROOM
+//  Philosophy: Fewer articles, much higher trust. Human approves everything.
+//  Gemini is accessed manually — this panel assists, not automates.
+// ═════════════════════════════════════════════════════════════════════════════
+
+const ST = { feeds: [], sel: null, cat: 'all', preparedSource: '', preparedTitle: '' };
+const LS = {
+  g: k => { try { return JSON.parse(localStorage.getItem('sc-' + k)) } catch { return null } },
+  s: (k, v) => localStorage.setItem('sc-' + k, JSON.stringify(v)),
+};
+
+// ─── GEMINI PROMPT (baked-in — the editorial standard) ───
+const GEMINI_PROMPT = `You are a Senior Technical Editor for The Streamic, an independent broadcast & media IT publication.
+
+TASK: Transform the following source text into a Streamic editorial article.
+
+RULES:
+1. Use ONLY facts from the source. If something is unclear, write "The source does not specify this."
+2. Do NOT invent vendor names, product features, or specifications.
+3. Do NOT use "[Source 1]" inline citation markers.
+4. No filler phrases: "in today's fast-paced world", "revolutionary", "game-changing", "excited to announce"
+5. Output clean HTML only — <h2>, <h3>, <p>, <strong>, <ul>/<li>. No <h1>, no <!DOCTYPE>.
+
+STRUCTURE — use exactly these sections:
+<h2>The Quick Hit</h2>
+1 paragraph: what happened, why a broadcast engineer should care right now.
+
+<h2>Technical Deep Dive</h2>
+2-3 paragraphs: how it works technically. Use ONLY what the source states.
+
+<h2>Deployment Roadmap</h2>
+1-2 paragraphs: how teams would evaluate or adopt this.
+
+<h2>Operational Wins</h2>
+1 paragraph: real-world impact on cost, speed, reliability, or workflow.
+
+TARGET: 600-1000 words. Authoritative but readable. Write for broadcast engineers, not marketers.
+
+SOURCE TEXT follows below:
+`;
+
+// ─── LOCK ─────────────────────────────────────────────────────────────────
+function unlock() {
+  const pass = document.getElementById('lock-pass').value;
+  const stored = LS.g('pass');
+  if (!stored || pass === stored) {
+    document.getElementById('lock').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    initApp();
+  } else {
+    document.getElementById('lock-pass').style.borderColor = 'var(--red)';
+  }
+}
+document.getElementById('lock-pass').addEventListener('keyup', e => { if (e.key === 'Enter') unlock() });
+if (!LS.g('pass')) { document.getElementById('lock').style.display = 'none'; document.getElementById('app').style.display = 'flex' }
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('s-token').value = LS.g('token') || '';
+  document.getElementById('s-repo').value = LS.g('repo') || 'Thestreamic/Streamic-OMS';
+  document.getElementById('s-pass').value = '';
+  document.getElementById('settings-modal').classList.add('show');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('show') }
+function saveSettings() {
+  LS.s('token', document.getElementById('s-token').value.trim());
+  LS.s('repo', document.getElementById('s-repo').value.trim() || 'Thestreamic/Streamic-OMS');
+  const np = document.getElementById('s-pass').value;
+  if (np) LS.s('pass', np);
+  closeSettings();
+  log('Settings saved', 'ok');
+}
+
+// ─── VIEW SWITCHING ───────────────────────────────────────────────────────
+function switchView(v) {
+  ['feeds', 'compose', 'review'].forEach(id => {
+    const el = document.getElementById('view-' + id);
+    if (el) el.style.display = id === v ? '' : 'none';
+  });
+  document.querySelectorAll('.topbar .tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+  if (v === 'review' && !tinymce.activeEditor) initTinyMCE();
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────────
+function log(msg, type = '') {
+  const el = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = 'e ' + type;
+  d.textContent = `[${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}] ${msg}`;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+  while (el.children.length > 25) el.removeChild(el.firstChild);
+}
+function setStatus(text, type = 'ok') {
+  const p = document.getElementById('status');
+  p.textContent = text;
+  p.className = 'pill ' + type;
+}
+
+// ─── FEED LOADING ─────────────────────────────────────────────────────────
+async function loadFeeds() {
+  log('Loading feeds…', 'info');
+  setStatus('Loading…', 'warn');
+  try {
+    const res = await fetch('data/news.json?_=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    let items;
+    if (Array.isArray(raw)) {
+      items = raw;
+    } else if (raw && typeof raw === 'object') {
+      items = [...(raw.featured_priority || []), ...(raw.items || [])];
+    } else {
+      throw new Error('Unexpected JSON shape');
+    }
+    ST.feeds = items;
+    document.getElementById('feed-count').textContent = `${items.length} items`;
+    renderFilters();
+    renderList();
+    setStatus(`${items.length} sources`, 'ok');
+    log(`Loaded ${items.length} RSS items`, 'ok');
+  } catch (e) {
+    setStatus('Feed error', 'err');
+    log('Feed load failed: ' + e.message, 'err');
+  }
+}
+
+function renderFilters() {
+  const cats = [...new Set(ST.feeds.map(f => f.category).filter(Boolean))].sort();
+  const el = document.getElementById('filters');
+  el.innerHTML = `<span class="chip ${ST.cat === 'all' ? 'on' : ''}" onclick="filterCat('all')">all</span>` +
+    cats.map(c => `<span class="chip ${ST.cat === c ? 'on' : ''}" onclick="filterCat('${c}')">${c}</span>`).join('');
+}
+function filterCat(c) { ST.cat = c; renderFilters(); renderList() }
+
+function renderList() {
+  const el = document.getElementById('feed-list');
+  let items = ST.feeds;
+  if (ST.cat !== 'all') items = items.filter(f => f.category === ST.cat);
+  if (!items.length) { el.innerHTML = '<div class="empty" style="height:auto;padding:30px"><p>No items in this category.</p></div>'; return }
+  el.innerHTML = items.map(f => {
+    const idx = ST.feeds.indexOf(f);
+    const sel = ST.sel === f ? ' sel' : '';
+    let dt = '';
+    if (f.pubDate) { const d = new Date(f.pubDate); if (!isNaN(d)) dt = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }
+    else if (f.timestamp) { dt = new Date(f.timestamp * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }
+    return `<div class="fi${sel}" onclick="selectFeed(${idx})">
+      <div class="top"><span class="src">${esc(f.source || '')}</span><span>${esc(f.category || '')}</span>${dt ? `<span>${dt}</span>` : ''}</div>
+      <div class="ttl">${esc(f.title || '(untitled)')}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectFeed(idx) {
+  ST.sel = ST.feeds[idx];
+  renderList();
+  const f = ST.sel;
+  document.getElementById('source-label').textContent = `${f.source || ''} · ${f.category || ''}`;
+  document.getElementById('source-body').innerHTML = `<iframe src="${escA(f.link)}" sandbox="allow-same-origin allow-scripts" referrerpolicy="no-referrer"></iframe>`;
+  document.getElementById('btn-newtab').disabled = false;
+  document.getElementById('btn-prepare').disabled = false;
+  log(`Selected: ${f.title.slice(0, 50)}…`);
+}
+
+function openInTab() { if (ST.sel) window.open(ST.sel.link, '_blank', 'noopener') }
+
+// ─── PREPARE FOR GEMINI ──────────────────────────────────────────────────
+function prepareForGemini() {
+  if (!ST.sel) return;
+  const f = ST.sel;
+  ST.preparedTitle = f.title;
+  ST.preparedSource = `Title: ${f.title}\nSource: ${f.source || 'Unknown'}\nURL: ${f.link}\nCategory: ${f.category || 'newsroom'}\nPublished: ${f.pubDate || 'Unknown'}\n\n(Note: The full source text should be copied from the article page. If the iframe loaded correctly, you can copy text from the source article directly. Otherwise, open the source in a new tab, select all article text, and paste it below this line.)\n\n---\n\n`;
+
+  // Fill the Gemini Assist screen
+  document.getElementById('prompt-text').textContent = GEMINI_PROMPT;
+  document.getElementById('source-text').textContent = ST.preparedSource;
+  document.getElementById('gemini-output').value = '';
+  document.getElementById('gemini-preview').style.display = 'none';
+  document.getElementById('validate-result').textContent = '';
+  document.getElementById('btn-to-review').disabled = true;
+
+  // Pre-fill review metadata
+  const today = new Date().toISOString().slice(0, 10);
+  const slug = `${today}-${f.category || 'newsroom'}-${f.title.toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').slice(0,55).replace(/-$/,'')}`;
+  document.getElementById('m-slug').value = slug;
+  document.getElementById('m-title').value = f.title;
+  document.getElementById('m-cat').value = f.category || 'newsroom';
+  document.getElementById('m-src').value = f.link;
+
+  switchView('compose');
+  log('Prepared for Gemini — copy prompt + source text', 'ok');
+}
+
+// ─── COPY BLOCK HELPER ───────────────────────────────────────────────────
+function copyBlock(id) {
+  const block = document.getElementById(id);
+  const pre = block.querySelector('pre') || block.querySelector('textarea');
+  const text = pre ? (pre.textContent || pre.value) : '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = block.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied') }, 2000);
+    log('Copied to clipboard', 'ok');
+  });
+}
+
+// ─── VALIDATE GEMINI OUTPUT ──────────────────────────────────────────────
+function validateGeminiOutput() {
+  let raw = document.getElementById('gemini-output').value.trim();
+  if (!raw) {
+    document.getElementById('validate-result').textContent = '⚠ Nothing to validate — paste Gemini output first';
+    document.getElementById('validate-result').style.color = 'var(--amber)';
+    return;
+  }
+
+  // Strip markdown code fences if present
+  raw = raw.replace(/^```(?:html)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+
+  // If no HTML tags, wrap paragraphs
+  if (!/<[a-z][\s\S]*>/i.test(raw)) {
+    raw = raw.split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('\n');
+  }
+
+  // Strip Gemini's own source block if it added one
+  raw = raw.replace(/<h[23]>\s*(?:Sources?|References)\s*<\/h[23]>\s*[\s\S]*$/i, '');
+
+  // Count quality signals
+  const h2Count = (raw.match(/<h2>/gi) || []).length;
+  const wordCount = raw.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  const hasSourceRef = /\[Source\s+\d+\]/i.test(raw);
+
+  // Quality checks
+  const issues = [];
+  if (wordCount < 300) issues.push(`Only ${wordCount} words (target: 600-1000)`);
+  if (h2Count < 2) issues.push(`Only ${h2Count} H2 sections (expect 4)`);
+  if (hasSourceRef) issues.push('Contains [Source N] markers — Gemini should not produce these');
+
+  // Clean [Source N] if present
+  raw = raw.replace(/\s*\[Source\s+\d+\]/g, '');
+
+  if (issues.length) {
+    document.getElementById('validate-result').innerHTML =
+      `<span style="color:var(--amber)">⚠ ${issues.join(' · ')}</span>`;
+  } else {
+    document.getElementById('validate-result').innerHTML =
+      `<span style="color:var(--green)">✓ ${wordCount} words, ${h2Count} sections — looks good</span>`;
+  }
+
+  // Show preview
+  document.getElementById('gemini-preview').style.display = 'block';
+  document.getElementById('gemini-preview-body').innerHTML = raw;
+  ST.validatedHtml = raw;
+
+  document.getElementById('btn-to-review').disabled = false;
+  log(`Validated: ${wordCount} words, ${h2Count} sections`, issues.length ? 'warn' : 'ok');
+}
+
+// ─── MOVE TO REVIEW ──────────────────────────────────────────────────────
+function moveToReview() {
+  if (!ST.validatedHtml) return;
+  switchView('review');
+  // Wait for TinyMCE to init
+  const waitForEditor = () => {
+    if (tinymce.activeEditor) {
+      tinymce.activeEditor.setContent(ST.validatedHtml);
+      updateWordCount();
+    } else {
+      setTimeout(waitForEditor, 200);
+    }
+  };
+  waitForEditor();
+  document.getElementById('wc-source').textContent = ST.sel ? ST.sel.source : '—';
+  log('Moved to Review — edit and publish when ready', 'ok');
+}
+
+// ─── TINYMCE ─────────────────────────────────────────────────────────────
+function initTinyMCE() {
+  tinymce.init({
+    selector: '#editor',
+    height: '100%',
+    menubar: false,
+    statusbar: false,
+    branding: false,
+    promotion: false,
+    plugins: 'lists link code wordcount',
+    toolbar: 'undo redo | blocks | bold italic | bullist numlist | link | code',
+    block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
+    content_style: `
+      body { font-family: 'Source Serif 4', Georgia, serif; font-size: 15px; line-height: 1.75; color: #e8eaef; padding: 20px 24px; max-width: 760px; margin: 0 auto; background: #22252f }
+      h2 { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; margin: 28px 0 10px; color: #e8eaef }
+      h3 { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; margin: 22px 0 8px; color: #b0b5c3 }
+      p { margin-bottom: 14px; color: #b0b5c3 }
+      a { color: #5b8def }
+    `,
+    skin: 'oxide-dark',
+    content_css: 'dark',
+    setup: ed => {
+      ed.on('input change keyup', updateWordCount);
+    }
+  });
+}
+
+function updateWordCount() {
+  if (!tinymce.activeEditor) return;
+  const html = tinymce.activeEditor.getContent();
+  const text = html.replace(/<[^>]+>/g, ' ');
+  const wc = text.split(/\s+/).filter(Boolean).length;
+  const h2 = (html.match(/<h2>/gi) || []).length;
+  document.getElementById('wc-count').textContent = wc;
+  document.getElementById('wc-sections').textContent = h2;
+}
+
+// ─── DRAFT MANAGEMENT ────────────────────────────────────────────────────
+function saveDraft() {
+  if (!tinymce.activeEditor) return;
+  const draft = {
+    slug: document.getElementById('m-slug').value,
+    title: document.getElementById('m-title').value,
+    cat: document.getElementById('m-cat').value,
+    src: document.getElementById('m-src').value,
+    body: tinymce.activeEditor.getContent(),
+    saved: new Date().toISOString(),
+  };
+  const drafts = LS.g('drafts') || [];
+  const idx = drafts.findIndex(d => d.slug === draft.slug);
+  if (idx >= 0) drafts[idx] = draft; else drafts.unshift(draft);
+  LS.s('drafts', drafts.slice(0, 15));
+  log(`Draft saved: ${draft.slug}`, 'ok');
+}
+function loadDraft() {
+  const drafts = LS.g('drafts') || [];
+  if (!drafts.length) { log('No drafts', 'info'); return }
+  const ch = prompt('Drafts:\n' + drafts.map((d, i) => `${i + 1}. ${d.slug} (${d.saved.slice(0, 10)})`).join('\n') + '\n\nEnter number:');
+  const i = parseInt(ch) - 1;
+  if (isNaN(i) || !drafts[i]) return;
+  const d = drafts[i];
+  document.getElementById('m-slug').value = d.slug;
+  document.getElementById('m-title').value = d.title;
+  document.getElementById('m-cat').value = d.cat;
+  document.getElementById('m-src').value = d.src;
+  if (tinymce.activeEditor) tinymce.activeEditor.setContent(d.body);
+  log(`Loaded draft: ${d.slug}`, 'ok');
+}
+
+// ─── PUBLISH (workflow_dispatch) ─────────────────────────────────────────
+async function publishArticle() {
+  const token = LS.g('token');
+  const repo = LS.g('repo') || 'Thestreamic/Streamic-OMS';
+  if (!token) { openSettings(); log('Set GitHub token first', 'err'); return }
+  if (!tinymce.activeEditor) return;
+
+  const slug = document.getElementById('m-slug').value.trim();
+  const title = document.getElementById('m-title').value.trim();
+  const category = document.getElementById('m-cat').value;
+  const sourceUrl = document.getElementById('m-src').value.trim();
+  const bodyHtml = tinymce.activeEditor.getContent();
+
+  if (!slug || !title || !bodyHtml) { log('Missing slug, title, or body', 'err'); return }
+
+  const wc = bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  if (wc < 300) {
+    if (!confirm(`Article is only ${wc} words. AdSense requires substantial content. Publish anyway?`)) return;
+  }
+
+  if (!confirm(`Publish "${title.slice(0, 50)}…" as:\n\n${slug}.html\n\nCategory: ${category}\nWords: ${wc}\n\nThis will commit to ${repo} and rebuild the site.`)) return;
+
+  setStatus('Publishing…', 'warn');
+  log('Triggering publish workflow…', 'info');
+
+  try {
+    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({
+      slug, title, category,
+      source_url: sourceUrl,
+      source_domain: sourceUrl ? new URL(sourceUrl).hostname.replace(/^www\./, '') : '',
+      body_html: bodyHtml,
+      generated_by: 'admin-gemini-desktop',
+      published: new Date().toISOString().slice(0, 10),
+      reviewed: true,
+      confidence_level: 'high',
+    }))));
+
+    const res = await fetch(
+      `https://api.github.com/repos/${repo}/actions/workflows/admin-dispatch.yml/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': `Bearer ${token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+        body: JSON.stringify({ ref: 'main', inputs: { action: 'publish', article_payload: payload } }),
+      }
+    );
+
+    if (!res.ok) throw new Error(`${res.status}: ${(await res.text()).slice(0, 200)}`);
+
+    setStatus('Published!', 'ok');
+    log(`Published: ${slug} — site rebuilding…`, 'ok');
+    log(`URL: https://www.thestreamic.in/articles/${slug}.html`, 'info');
+  } catch (e) {
+    setStatus('Publish failed', 'err');
+    log('Publish error: ' + e.message, 'err');
+  }
+}
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function escA(s) { return String(s).replace(/"/g, '&quot;') }
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+function initApp() {
+  loadFeeds();
+  log('Editorial Control Room ready', 'ok');
+}
+
+// Auto-init if no passphrase set
+if (document.getElementById('app').style.display === 'flex') {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
+  else initApp();
+}
+</script>
+</body>
+</html>

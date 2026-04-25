@@ -1,0 +1,183 @@
+<!-- HAND_AUTHORED -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',
+    'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0VSHDN3ZR6"></script>
+  <script>gtag('js',new Date());gtag('config','G-0VSHDN3ZR6');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>From Bots to Agents: How AWS and Google Cloud Are Solving the Newsroom Headache | The Streamic</title>
+  <meta name="description" content="NAB 2026 deep dive &mdash; AWS Elemental Inference, Google Cloud &amp; Avid Gemini integration, Microsoft Copilot Studio for Media, and the shift from generative AI to agentic AI in broadcast workflows.">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="The Streamic Editorial Team">
+  <meta name="keywords" content="AWS Elemental Inference, Google Cloud Avid partnership, Gemini Avid Media Composer, agentic AI broadcast, Microsoft Copilot Studio media, Avid Content Core, Amagi Newspulse, Imagine Landmark, Evertz, EVS Tactiq, NAB 2026, hybrid cloud broadcast">
+  <link rel="canonical" href="https://www.thestreamic.in/articles/deepdive-aws-google-cloud-agentic-ai-nab-2026.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Streamic">
+  <meta property="og:title" content="From Bots to Agents: How AWS and Google Cloud Are Solving the Newsroom Headache">
+  <meta property="og:description" content="NAB 2026 deep dive &mdash; AWS Elemental Inference, Google Cloud &amp; Avid Gemini integration, Microsoft Copilot Studio for Media, and the shift from generative AI to agentic AI in broadcast workflows.">
+  <meta property="og:url" content="https://www.thestreamic.in/articles/deepdive-aws-google-cloud-agentic-ai-nab-2026.html">
+  <meta property="og:image" content="https://www.thestreamic.in/assets/deepdives/ms-server-datacenter.png">
+  <meta property="article:published_time" content="2026-04-18T00:00:00Z">
+  <meta property="article:modified_time" content="2026-04-19T00:00:00Z">
+  <meta property="article:section" content="Deep Dive">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="From Bots to Agents: How AWS and Google Cloud Are Solving the Newsroom Headache">
+  <meta name="twitter:description" content="NAB 2026 deep dive &mdash; AWS Elemental Inference, Google Cloud &amp; Avid Gemini integration, Microsoft Copilot Studio for Media, and the shift from generative AI to agentic AI in broadcast workflows.">
+  <meta name="twitter:image" content="https://www.thestreamic.in/assets/deepdives/ms-server-datacenter.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../homepage-layout.css">
+  <style>
+    .dd-art-hero{position:relative;min-height:clamp(140px,11vw,180px);aspect-ratio:40/9;overflow:hidden;background:#0a0a0f;margin:0 -24px 0}
+    @supports not (aspect-ratio:40/9){.dd-art-hero{height:clamp(140px,11vw,180px)}}
+    .dd-art-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;filter:contrast(1.06) saturate(1.05) brightness(.88)}
+    .dd-art-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,10,20,.35) 0%,rgba(8,10,20,.55) 45%,rgba(8,10,20,.90) 100%),linear-gradient(90deg,rgba(8,10,20,.55) 0%,rgba(8,10,20,.15) 65%,transparent 100%)}
+    .dd-art-hero-body{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:16px clamp(20px,4vw,48px) 18px;display:flex;flex-direction:column;justify-content:flex-end;min-height:inherit;box-sizing:border-box}
+    .dd-art-eyebrow{font:700 11px/1 'DM Sans',system-ui;letter-spacing:.18em;text-transform:uppercase;color:#f7dca6;margin-bottom:16px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+    .dd-art-kicker{display:block;font:700 11.5px/1 'DM Sans',system-ui;letter-spacing:.3em;text-transform:uppercase;color:#f7dca6;margin-bottom:14px;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+    .dd-art-headline{font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(22px,3.2vw,36px);color:#fff;line-height:1.04;letter-spacing:-.03em;margin:0 0 12px;text-shadow:0 3px 18px rgba(0,0,0,.75),0 1px 3px rgba(0,0,0,.9);max-width:100%;overflow-wrap:break-word;hyphens:auto}
+    .dd-art-headline em{font-style:italic;background:linear-gradient(120deg,#f7dca6 0%,#e8b672 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .dd-art-meta{color:rgba(255,255,255,.85);font:500 13px/1.4 'DM Sans',system-ui;display:flex;flex-wrap:wrap;gap:12px;align-items:center;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+    .dd-art-meta .dot{opacity:.4}
+    .dd-art-body{max-width:720px;margin:0 auto;padding:52px 24px 72px}
+    .dd-art-lead{font-family:'Lora',Georgia,serif;font-size:clamp(17px,2vw,20px);line-height:1.6;color:#2a2520;margin:0 0 30px;font-weight:500}
+    .dd-art-body p{font-family:'Lora',Georgia,serif;font-size:16.5px;line-height:1.8;color:#3a332a;margin:0 0 18px}
+    .dd-art-body p strong{color:#1a1510;font-weight:700}
+    .dd-art-body h2{font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(22px,2.8vw,28px);line-height:1.22;letter-spacing:-.02em;color:#17120f;margin:38px 0 14px}
+    .dd-art-body h2 .num{color:#b58a3c;font-size:.58em;font-family:'DM Sans',system-ui;font-weight:700;letter-spacing:.14em;display:block;margin-bottom:6px;text-transform:uppercase}
+    .dd-art-pullquote{margin:32px 0;padding:22px 26px;background:#fdf9ef;border-left:4px solid #b58a3c;border-radius:4px;font-family:'DM Serif Display',Georgia,serif;font-style:italic;font-size:clamp(17px,2vw,21px);line-height:1.45;color:#17120f}
+    .dd-art-sources{margin-top:48px;padding-top:24px;border-top:1px solid #ebe2cc;font-size:13px;color:#5a4f40;line-height:1.75}
+    .dd-art-sources strong{display:block;color:#17120f;margin-bottom:8px;font-family:'DM Sans',system-ui;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+    .dd-art-sources a{color:#5f3b13;text-decoration:underline;text-decoration-color:rgba(95,59,19,.3);text-underline-offset:2px}
+    .dd-art-sources a:hover{color:#17120f;text-decoration-color:currentColor}
+    .dd-art-bio{display:flex;gap:16px;align-items:center;margin-top:44px;padding:22px;background:#fbf8f1;border-radius:10px;border:1px solid #ebe2cc}
+    .dd-art-bio-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#b58a3c,#8a6826);color:#fff;display:flex;align-items:center;justify-content:center;font:700 20px/1 'DM Serif Display',serif;flex-shrink:0}
+    .dd-art-bio-body strong{display:block;font:600 14px/1.3 'DM Sans',system-ui;color:#17120f}
+    .dd-art-bio-body span{display:block;font-size:12px;color:#7a6f5e;margin:2px 0 6px}
+    .dd-art-bio-body p{margin:0;font-size:13px;line-height:1.55;color:#554a3e;font-family:'DM Sans',system-ui}
+    .dd-art-more{margin-top:36px;padding-top:24px;border-top:1px solid #ebe2cc}
+    .dd-art-more h3{font-family:'DM Serif Display',Georgia,serif;font-size:17px;color:#17120f;margin:0 0 12px;font-weight:400}
+    .dd-art-more a{display:inline-block;margin:0 14px 6px 0;color:#5f3b13;font:600 13px/1 'DM Sans',system-ui;text-decoration:none}
+    .dd-art-more a:hover{color:#17120f;text-decoration:underline}
+    @media(max-width:900px){.dd-art-hero{aspect-ratio:24/9;min-height:160px}.dd-art-headline{font-size:clamp(22px,5.5vw,34px)}}
+    @media(max-width:640px){.dd-art-hero{aspect-ratio:21/9;min-height:140px}.dd-art-body{padding:40px 18px 56px}.dd-art-hero-body{padding:14px 18px 16px}}
+  </style>
+  <meta name="google-adsense-account" content="ca-pub-8033069131874524">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" aria-hidden="true">
+      <div class="nav-logo-text">
+        <span class="nav-logo-name">The Streamic</span>
+        <span class="nav-logo-tagline">Media &amp; Broadcast IT Analysis</span>
+      </div>
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <ul class="nav-links"><li><a href="../index.html">Home</a></li><li><a href="../ai-post-production.html">AI in Broadcasting</a></li><li><a href="../howto.html">How-To Guides</a></li><li><a href="../post-production-workflows.html">Post Production Workflows</a></li><li><a href="../insights.html">Expert Insights</a></li><li><a href="../editorsdesk.html">Editorial Insights</a></li></ul>
+    <div class="nav-right"><a href="../about.html" class="nav-desk">About</a></div>
+  </div>
+  <div class="nav-gold" aria-hidden="true"></div>
+</nav>
+<main>
+  <header class="dd-art-hero">
+    <img class="dd-art-hero-img" src="../assets/deepdives/ms-server-datacenter.png" alt="Hyperscale data center aisle representing cloud-native agentic AI infrastructure" loading="eager">
+    <div class="dd-art-hero-overlay" aria-hidden="true"></div>
+    <div class="dd-art-hero-body">
+      <div class="dd-art-eyebrow">Deep Dive &middot; Infrastructure</div>
+      <h1 class="dd-art-headline"><span class="dd-art-kicker">Infrastructure &middot; Deep Dive 02</span>From Bots to Agents: <em>AWS &amp; Google Cloud Solve the Newsroom</em></h1>
+      <div class="dd-art-meta">
+        <span>By The Streamic Editorial Team</span>
+        <span class="dot">&middot;</span>
+        <span>8 min read</span>
+        <span class="dot">&middot;</span>
+        <span>April 18, 2026</span>
+      </div>
+    </div>
+  </header>
+  <article class="dd-art-body">
+    <p class="dd-art-lead">2025 was the year of AI that created stuff. NAB 2026 is the year of agentic AI &mdash; AI that does stuff autonomously. AWS, Google Cloud, and Microsoft Azure all showed up with real deployment products, not demos. Here is what actually shipped.</p>
+    <h2><span class="num">01 &middot; AWS Elemental Inference</span>The Social Media Fixer</h2>
+    <p>Walking through the North Hall at NAB 2026, it was impossible to miss the &ldquo;AI&rdquo; signs. But where 2025 was about AI that <em>created</em> stuff, 2026 is about agentic AI &mdash; AI that <strong>does</strong> stuff autonomously.</p>
+    <p>The standout official announcement from AWS is <strong>Elemental Inference</strong>, a fully managed service that works in parallel with live encoding. We&rsquo;ve all seen auto-clipping before, but this is architecturally different. It&rsquo;s an agent that monitors the live broadcast feed, recognises high-value moments &mdash; a goal, a breaking news quote, a key reaction &mdash; and then autonomously re-formats the clip for vertical social feeds, writes the caption in the station&rsquo;s house voice, and queues it for human approval.</p>
+    <p>The output window is under ten seconds from live broadcast to queued social asset. For sports and news organisations, this collapses a workflow that previously required a dedicated social producer into a background service.</p>
+
+    <h2><span class="num">02 &middot; The Google Cloud / Avid Marriage</span>Agentic Search Inside Media Composer</h2>
+    <p>The biggest show-floor surprise was the formal <strong>Google Cloud and Avid</strong> strategic partnership announcement. Google&rsquo;s Gemini models are now integrated directly into Avid Media Composer, and <strong>Avid Content Core</strong> &mdash; the cloud-native SaaS platform built on Google Cloud&rsquo;s BigQuery and Vertex AI &mdash; is generally available for global asset management.</p>
+    <p>The practical impact lives inside the editor&rsquo;s daily workflow. Instead of an assistant editor spending six hours logging and tagging metadata on a shoot day&rsquo;s rushes, an editor can now ask the system: &ldquo;Find me every shot of the sunset where the presenter is wearing a blue tie.&rdquo; The AI performs multimodal visual understanding against the cloud archive and returns the clips instantly.</p>
+    <p>This is what agentic search looks like in production: natural language against visual content, not keyword matching against manual metadata tags. The editor doesn&rsquo;t learn a new tool; they keep Media Composer, but the cloud archive becomes conversationally navigable.</p>
+
+    <aside class="dd-art-pullquote">&ldquo;2025 was the year of AI that created stuff. 2026 is the year of AI that does stuff. The difference is measured in hours saved per project, not demos watched per keynote.&rdquo;</aside>
+
+    <h2><span class="num">03 &middot; Microsoft Azure&rsquo;s Pivot</span>From Silent Backbone to Agentic Partner</h2>
+    <p>Microsoft Azure&rsquo;s NAB 2026 story is the quiet strategic pivot. Azure is moving away from being &ldquo;the silent backbone&rdquo; &mdash; the undifferentiated cloud that ran everyone else&rsquo;s workloads &mdash; and repositioning as a partner-led agentic AI leader.</p>
+    <p>The demonstration piece is <strong>Copilot Studio for Media</strong>, showing how Copilot can replace commodity hardware with agent-to-agent workflows that handle newsroom tasks, metadata extraction, and archive search. The subtext is sharper than the demo: Azure is willing to compete for the workflow layer, not just the compute layer underneath.</p>
+
+    <h2><span class="num">04 &middot; The Wider Agentic Map</span>Amagi, Imagine, Evertz, EVS</h2>
+    <p>The hyperscalers aren&rsquo;t alone. Across the show floor, established broadcast vendors are shipping their own agentic solutions on top of these cloud substrates:</p>
+    <p><strong>Amagi Newspulse</strong> is an agentic AI platform that autonomously scans live news and VOD to package social-ready clips and bulletins in real-time. <strong>Imagine Communications</strong> has added AI-assisted scheduling to the Landmark platform, automating non-prime scheduling (overnights, off-peak) using machine learning. <strong>Evertz</strong> is showcasing cloud-native live event management for dynamic market switching across distributed hybrid workflows. <strong>EVS Tactiq</strong> is a modular software-defined control interface that decouples the operator from the physical hardware &mdash; any operator can control any room from any location.</p>
+
+    <h2><span class="num">05 &middot; What Changes for Newsrooms</span>Control and Visibility Become the Product</h2>
+    <p>The common operational thread at NAB 2026 is <strong>control and visibility</strong>. Broadcasters are no longer trying to move everything to the cloud. Hybrid is not a transition; it is the destination. High-value continuous workflows &mdash; main channel playout, live event production &mdash; stay on-prem or on private compute. Cloud becomes the burst capacity layer: pop-up channels, sports betting feeds, disaster recovery, social clipping, archive search.</p>
+    <p>The new competitive surface is the single pane of glass that manages both estates as one virtual broadcast facility. The vendor who wins that orchestration layer &mdash; and the agentic AI that runs on top of it &mdash; wins the 2026 newsroom. AWS, Google, and Microsoft are all making credible claims. The broadcasters betting correctly are the ones treating this as an architecture decision, not a vendor decision.</p>
+
+    <div class="dd-art-sources"><strong>Sources referenced</strong>
+      AWS Elemental Inference announcement &mdash; AWS NAB 2026 press pack, April 2026 &middot; <a href="https://aws.amazon.com/media/" rel="nofollow noopener" target="_blank">aws.amazon.com/media</a><br>
+      Google Cloud + Avid strategic partnership &mdash; IBC365, Newsshooter, TV Tech &middot; <a href="https://www.ibc.org/artificial-intelligence/news/avid-and-google-cloud-partner-to-bring-agentic-ai-for-media-production/23136" rel="nofollow noopener" target="_blank">ibc.org</a><br>
+      Avid Content Core (Vertex AI, BigQuery) &middot; <a href="https://www.tvtechnology.com/news/avid-connects-its-news-platforms-with-avid-content-core-for-2026-nab-show" rel="nofollow noopener" target="_blank">tvtechnology.com</a><br>
+      Microsoft Copilot Studio for Media &middot; <a href="https://azure.microsoft.com/" rel="nofollow noopener" target="_blank">azure.microsoft.com</a><br>
+      Amagi Newspulse, Imagine Communications Landmark, Evertz cloud-native live event management, EVS Tactiq &mdash; NAB 2026 vendor press releases, April 2026.
+    </div>
+    <div class="dd-art-bio">
+      <div class="dd-art-bio-avatar">P</div>
+      <div class="dd-art-bio-body">
+        <strong>Prerak K Mehta</strong>
+        <span>Founder, The Streamic &middot; Dublin, Ireland</span>
+        <p>Broadcast technology professional with 25+ years in IT and 20 years in media / post-production / broadcast IT systems.</p>
+      </div>
+    </div>
+    <div class="dd-art-more">
+      <h3>Continue Reading</h3>
+      <a href="nab-2026-hybrid-technology-year.html">&#128230; NAB 2026 Field Report</a>
+      <a href="../ai-post-production.html">&#127916; AI in Broadcasting</a>
+      <a href="../insights.html">&#10022; Expert Insights</a>
+      <a href="../index.html">&#11088; All Coverage</a>
+    </div>
+  </article>
+</main>
+<footer class="footer">
+  <div class="footer-gold" aria-hidden="true"></div>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">The Streamic</div>
+      <div class="footer-tagline">Media &amp; Broadcast IT Analysis</div>
+      <p class="footer-tag">Independent broadcast &amp; streaming technology journalism.</p>
+    </div>
+    <div class="footer-col"><h4>Coverage</h4>
+      <a href="../ai-post-production.html">AI in Broadcasting</a>
+      <a href="../howto.html">How-To Guides</a>
+      <a href="../post-production-workflows.html">Post Production Workflows</a>
+      <a href="../insights.html">Insights</a>
+    </div>
+    <div class="footer-col"><h4>Site</h4>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../editorial-policy.html">Editorial Policy</a>
+      <a href="../privacy.html">Privacy Policy</a>
+    </div>
+    <div class="footer-col"><h4>Dublin, Ireland</h4>
+      <a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>&copy; 2026 The Streamic &mdash; thestreamic.in</span><span>All trademarks belong to their respective owners.</span></div>
+</footer>
+<script src="../main.js" defer></script>
+</body>
+</html>

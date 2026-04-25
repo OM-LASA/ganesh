@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages (Static)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploys docs/ as pure static HTML — NO Jekyll processing.
+# Uses Node.js 24-compatible action versions (fixes the deprecation warnings).
+# Triggered after every push to main that touches docs/.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/**"
+      - "index.html"      # Also re-deploy if root index.html changes
+  workflow_dispatch:      # Allow manual trigger from GitHub Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  deploy:
+    name: Deploy static site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Verify index.html exists in docs/
+        run: |
+          test -f docs/index.html || (echo "docs/index.html missing — build must run first" && exit 1)
+          echo "docs/index.html: $(wc -c < docs/index.html) bytes"
+          echo "Total docs/ files: $(find docs -type f | wc -l)"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Report deployed URL
+        run: echo "Deployed to ${{ steps.deploy.outputs.page_url }}"

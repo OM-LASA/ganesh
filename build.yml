@@ -1,0 +1,78 @@
+name: Streamic Auto Build
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      summaries_only:
+        description: "Run Groq summary generation + build only"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false","true"]
+
+permissions:
+  contents: write
+
+env:
+  SITE_BASE_URL: "https://www.thestreamic.in"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build:
+    name: Fetch + Generate + Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install feedparser beautifulsoup4 python-slugify jinja2 requests
+
+      - name: Fetch RSS feeds
+        if: github.event.inputs.summaries_only != 'true'
+        run: python scripts/fetch_rss.py
+
+      - name: Generate RSS article cards
+        if: github.event.inputs.summaries_only != 'true'
+        run: python scripts/rewrite_feed.py
+
+      - name: Generate editorial deep-dives
+        if: github.event.inputs.summaries_only != 'true'
+        run: python scripts/generate_editorial.py
+
+      - name: Groq AI summaries (if key available)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_PREMIUM_ONLY: "true"
+          GROQ_MAX_PER_RUN: "4"
+        run: python ./scripts/generate_summaries.py || echo "Groq step skipped"
+
+      - name: Build site
+        run: python scripts/build.py
+
+      - name: Verify build
+        run: |
+          test -f docs/index.html     || exit 1
+          test -f docs/featured.html  || exit 1
+          test -f docs/sitemap.xml    || exit 1
+          echo "Articles: $(find docs/articles -name '*.html' | wc -l)"
+          echo "Pages:    $(find docs -maxdepth 1 -name '*.html' | wc -l)"
+
+      - name: Commit
+        run: |
+          git config user.name  "Streamic Bot"
+          git config user.email "technodate3@gmail.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "build: auto-refresh [skip ci]" && git fetch origin main && (git merge origin/main --no-edit -s recursive -X ours 2>/dev/null || git merge origin/main --no-edit || true) && git push origin main)

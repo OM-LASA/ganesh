@@ -1,0 +1,192 @@
+<!-- HAND_AUTHORED -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied',
+    'ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0VSHDN3ZR6"></script>
+  <script>gtag('js',new Date());gtag('config','G-0VSHDN3ZR6');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Integrating Vizrt Graphics with Avid MediaCentral and iNEWS | The Streamic</title>
+  <meta name="description" content="Configure the Vizrt Plugin for MediaCentral and the MOS Gateway to connect Viz Engine templates to iNEWS stories for story-driven graphics playout.">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="The Streamic Editorial Team">
+  <link rel="canonical" href="https://www.thestreamic.in/articles/guide-vizrt-avid-integration.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Streamic">
+  <meta property="og:title" content="Integrating Vizrt Graphics with Avid MediaCentral and iNEWS | The Streamic">
+  <meta property="og:description" content="Configure the Vizrt Plugin for MediaCentral and the MOS Gateway to connect Viz Engine templates to iNEWS stories for story-driven graphics playout.">
+  <meta property="og:url" content="https://www.thestreamic.in/articles/guide-vizrt-avid-integration.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../homepage-layout.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../" class="nav-logo">
+      <img src="../assets/logo.png" alt="" onerror="this.style.display='none'" aria-hidden="true">
+      <div class="nav-logo-text">
+        <span class="nav-logo-name">The Streamic</span>
+        <span class="nav-logo-tagline">Media &amp; Broadcast IT Analysis</span>
+      </div>
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <ul class="nav-links"><li><a href="/">Home</a></li><li><a href="../ai-post-production.html">AI in Broadcasting</a></li><li><a href="../howto.html" class="active">How-To Guides</a></li><li><a href="../post-production-workflows.html">Post Production Workflows</a></li><li><a href="../insights.html">Expert Insights</a></li><li><a href="../editorsdesk.html">Editorial Insights</a></li></ul>
+    <div class="nav-right">
+      <a href="../about.html" class="nav-desk">About</a>
+      <button class="nav-toggle" aria-label="Menu" type="button" onclick="(function(b,m){m.classList.toggle('open');b.setAttribute('aria-expanded',m.classList.contains('open'));document.body.classList.toggle('menu-open',m.classList.contains('open'));})(this,this.closest('nav').querySelector('.nav-mob'))">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-gold" aria-hidden="true"></div>
+  <div class="nav-mob"><a href="/">Home</a><a href="../ai-post-production.html">AI in Broadcasting</a><a href="../howto.html">How-To Guides</a><a href="../post-production-workflows.html">Post Production Workflows</a><a href="../insights.html">Expert Insights</a><a href="../editorsdesk.html">Editorial Insights</a><a href="../about.html">About</a><a href="../contact.html">Contact</a></div>
+</nav>
+<main>
+  <div class="art-wrap">
+    <div class="art-breadcrumb">
+      <a href="../featured.html">Home</a>
+      <span>›</span>
+      <a href="../howto.html" style="color:var(--blue)">How-To Guides</a>
+    </div>
+    <span class="art-tag" style="background:var(--blue)">&#128295; Vizrt · Avid · MOS</span>
+    <h1>Integrating Vizrt Graphics with Avid MediaCentral and iNEWS</h1>
+    <p class="art-dek">Configure the Vizrt Plugin for MediaCentral and the MOS Gateway to connect Viz Engine templates to iNEWS stories for story-driven graphics playout.</p>
+    <div class="art-byline">
+      <strong>The Streamic Editorial Team</strong>
+      <span>&#128337; 9 min read</span>
+      <span style="background:#10b981;color:#fff;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px">How-To Guide</span>
+    </div>
+    <div class="art-body">
+<h2>The three-system handshake</h2>
+<p>A newsroom graphics integration involves three systems: iNEWS (the rundown), MediaCentral (editor UI), and Viz Engine/Mosart (the graphics engine). They speak via MOS protocol — a 1990s XML-over-TCP standard that the whole broadcast industry still runs on. Getting the handshake right requires configuration at all three endpoints and a MOS Gateway in the middle.</p>
+<h2>MOS Gateway setup</h2>
+<p>Start at the MOS Gateway (typically Avid&#39;s iNEWS MOS Gateway, though Vizrt ships their own alternative). Configure iNEWS NRCS as one side of the connection and Viz Mosart (or Viz Trio for graphics-only) as the other. Each side needs a unique <strong>MOS ID</strong> — pick names that describe the role (e.g. <code>VIZMOSART.NEWSROOM.COM</code>). Confirm the gateway handshakes with both sides by checking <code>/var/log/mos-gateway.log</code> for &quot;heartbeat ack&quot; messages.</p>
+<h2>iNEWS story plugin</h2>
+<p>In iNEWS, the production manager installs the Vizrt story plugin (MOS Active X plugin, still the standard in 2026). This gives journalists a &quot;Viz&quot; tab in the story form where they can browse templates, fill in slots (name, role, banner text), and drop the resulting MOS object into the rundown. The MOS object is a reference — not the graphic itself — so iNEWS stays lightweight.</p>
+<h2>MediaCentral integration</h2>
+<p>From the MediaCentral admin, enable the Vizrt panel under <strong>Plugins</strong>. This gives MediaCentral editors the same template browser as iNEWS journalists, accessed from the sequence timeline. Editors can preview the graphic against the clip it sits on top of — useful for timing lower-thirds to the exact moment the interviewee starts speaking.</p>
+<h2>Common integration failures</h2>
+<p><strong>MOS heartbeat lost:</strong> usually a firewall rule change. MOS uses TCP 10540/10541 — make sure both are open between gateway and all clients. <strong>Templates don&#39;t appear:</strong> check the Viz scene database is accessible from the MediaCentral host; Vizrt uses SMB for the scene share. <strong>Graphics play late:</strong> this is almost always an iNEWS rundown timing issue, not Vizrt — audit the rundown pre-roll settings.</p>
+<h2>Production best practices</h2>
+<p>Name templates clearly — editors waste hours hunting through lists named &quot;LT_Proj3_v4_REV2&quot;. Standardise on descriptive names: &quot;LowerThird-NamePlusRole-Blue&quot;. Keep a test rundown with representative template types that the engineering team runs through every morning — catches template regressions before they hit air. And document the MOS object IDs of all templates; if the Viz database ever rebuilds, you&#39;ll need to re-map.</p>
+<h2>Disaster-recovery testing</h2>
+<p>Test the MOS gateway failover procedure quarterly. The typical DR scenario: primary MOS gateway loses network connectivity, the secondary gateway takes over automatically, and rundowns continue flowing to Viz Engine without interruption. If you&#39;ve never actually tested this, you don&#39;t actually have redundancy — you have hope. Do the test during a scheduled maintenance window, never mid-newscast. Document the measured failover time (under 30 seconds is good, over 2 minutes means the secondary is misconfigured and needs investigation). Crucially, also test that templates produced during the failover actually play to air — sometimes the secondary gateway accepts MOS objects but the Viz Engine cannot render them because a scene database reference path is broken. This kind of partial failure is worse than a clean outage because it isn&#39;t obvious until the graphic is supposed to appear on air.</p>
+
+    </div>
+    <div class="art-author">
+      <strong>About this guide</strong>
+      Written by The Streamic Editorial Team. Practical broadcast and post-production workflow guide for engineers and media operations teams.
+      <a href="/about.html" style="color:var(--blue);margin-left:6px;">About The Streamic &rarr;</a>
+    </div>
+    <div class="art-more">
+      <h3>More How-To Guides</h3>
+      <a href="../howto.html">&#128295; All How-To Guides</a>
+      <a href="../featured.html">&#11088; Featured Stories</a>
+    </div>
+  </div>
+</main>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Integrating Vizrt Graphics with Avid MediaCentral and iNEWS",
+  "description": "Configure the Vizrt Plugin for MediaCentral and the MOS Gateway to connect Viz Engine templates to iNEWS stories for story-driven graphics playout.",
+  "datePublished": "2026-01-15",
+  "dateModified": "2026-01-15",
+  "author": {
+    "@type": "Organization",
+    "name": "The Streamic Editorial Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "The Streamic",
+    "url": "https://www.thestreamic.in",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.thestreamic.in/assets/logo.png"
+    }
+  },
+  "mainEntityOfPage": "https://www.thestreamic.in/articles/guide-vizrt-avid-integration.html"
+}</script>
+<footer class="footer">
+  <div class="footer-gold" aria-hidden="true"></div>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">The Streamic</div>
+      <div class="footer-tagline">Media &amp; Broadcast IT Analysis</div>
+      <p class="footer-tag">Independent broadcast &amp; streaming technology journalism. Original analysis for engineers and media professionals.</p>
+      <div class="footer-social">
+        <a href="https://twitter.com/thestreamic" target="_blank" rel="noopener noreferrer" class="footer-social-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          @thestreamic
+        </a>
+        <a href="https://www.linkedin.com/company/thestreamic" target="_blank" rel="noopener noreferrer" class="footer-social-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          TheStreamic
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Coverage</h4>
+      <a href="../ai-post-production.html">AI in Broadcasting</a>
+      <a href="../howto.html">How-To Guides</a>
+      <a href="../post-production-workflows.html">Post Production Workflows</a>
+      <a href="../insights.html">Expert Insights</a>
+      <a href="../editorsdesk.html">Editorial Insights</a>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../editorial-policy.html">Editorial Policy</a>
+      <a href="../privacy.html">Privacy Policy</a>
+      <a href="../terms.html">Terms of Use</a>
+    </div>
+    <div class="footer-col">
+      <h4>Dublin, Ireland</h4>
+      <a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a>
+      <span style="font-size:12px;color:#bbb;display:block;margin-top:4px">Adamstown, Lucan</span>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 The Streamic &mdash; thestreamic.in</span>
+    <span>All trademarks belong to their respective owners.</span>
+  </div>
+</footer>
+<div id="ts-cookie">
+  <div class="cookie-in">
+    <div class="cookie-txt">
+      <strong>We use cookies</strong>
+      Analytics cookies help us understand site performance. Optional advertising cookies are disabled until future activation.
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+    <div class="cookie-btns">
+      <button class="cookie-no" onclick="tsCC(false)">Reject optional</button>
+      <button class="cookie-ok" onclick="tsCC(true)">Accept all</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var K='ts_cc',s=localStorage.getItem(K),b=document.getElementById('ts-cookie');
+  if(!s&&b)b.style.display='block';
+  window.tsCC=function(ok){
+    localStorage.setItem(K,ok?'granted':'denied');
+    if(b)b.style.display='none';
+    if(typeof gtag!='undefined')gtag('consent','update',{
+      analytics_storage:ok?'granted':'denied',ad_storage:'denied',
+      ad_user_data:'denied',ad_personalization:'denied'});
+  };
+  if(s==='granted'&&typeof gtag!='undefined')gtag('consent','update',{
+    analytics_storage:'granted',ad_storage:'denied',
+    ad_user_data:'denied',ad_personalization:'denied'});
+})();
+</script>
+</body>
+</html>

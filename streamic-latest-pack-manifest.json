@@ -1,0 +1,20 @@
+{
+  "created_articles": [
+    "2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation.html",
+    "2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow.html",
+    "2026-04-01-newsroom-vizrt-viz-one-ai-metadata-archive-strategy.html",
+    "2026-04-01-ai-post-production-editshare-analytical-ai-mediasilo-nab-2026.html",
+    "2026-04-01-newsroom-dalet-flex-2512-semantic-search-dalia-ai.html",
+    "2026-04-01-cloud-tedial-agentic-ai-media-lifecycle-nab-2026.html",
+    "2026-04-01-playout-harmonic-spectrum-x-plus-playout-economics.html",
+    "2026-04-01-playout-pebble-future-ready-playout-nab-2026.html",
+    "2026-04-01-newsroom-aveco-rundown-designer-no-nrcs-studio-automation.html",
+    "2026-04-01-infrastructure-smpte-st2110-ai-media-nab-2026.html"
+  ],
+  "updated_files": [
+    "data/generated_articles.json",
+    "data/news.json",
+    "index.html"
+  ],
+  "note": "Homepage latest-news block updated with first 8 of the 10 new articles. generated_articles.json and news.json include all 10."
+}

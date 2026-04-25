@@ -1,0 +1,113 @@
+name: Admin Dispatch (generate / publish)
+
+# Triggered by the admin dashboard via repository_dispatch or workflow_dispatch.
+# Two actions:
+#   - generate: call Gemini/Mistral, upload result as artifact for dashboard
+#   - publish:  decode payload, render via build.py article_page(), commit
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'generate | publish'
+        required: true
+        type: choice
+        options:
+          - generate
+          - publish
+        default: generate
+      # Generate-mode inputs
+      model:
+        description: 'AI model (gemini | mistral | groq)'
+        required: false
+        type: string
+        default: 'groq'
+      source_url:
+        description: 'Source article URL (generate)'
+        required: false
+        type: string
+      source_title:
+        description: 'Source article title (generate)'
+        required: false
+        type: string
+      category:
+        description: 'Category slug (generate)'
+        required: false
+        type: string
+        default: 'newsroom'
+      word_target:
+        description: 'Target word count (generate)'
+        required: false
+        type: string
+        default: '800'
+      # Publish-mode inputs
+      article_payload:
+        description: 'base64-encoded JSON article payload (publish)'
+        required: false
+        type: string
+
+permissions:
+  contents: write    # publish action commits articles
+  actions: read      # dashboard polls for run status + artifacts
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run admin_publish.py
+        env:
+          ACTION: ${{ inputs.action }}
+          INPUT_MODEL: ${{ inputs.model }}
+          INPUT_SOURCE_URL: ${{ inputs.source_url }}
+          INPUT_SOURCE_TITLE: ${{ inputs.source_title }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_WORD_TARGET: ${{ inputs.word_target }}
+          INPUT_ARTICLE_PAYLOAD: ${{ inputs.article_payload }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python scripts/admin_publish.py
+
+      # ── GENERATE: upload AI result as artifact for dashboard to download ──
+      - name: Upload generated article artifact
+        if: ${{ inputs.action == 'generate' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-article
+          path: /tmp/generated-article.json
+          retention-days: 1
+          if-no-files-found: error
+
+      # ── PUBLISH: commit the new article + data update ──
+      - name: Commit and push (publish only)
+        if: ${{ inputs.action == 'publish' }}
+        run: |
+          git config user.name  "Streamic Admin Bot"
+          git config user.email "technodate3@gmail.com"
+          git add -A docs/articles/ data/generated_articles.json
+          if ! git diff --cached --quiet; then
+            git commit -m "admin: publish article via dashboard [skip ci]"
+            git fetch origin main
+            git rebase origin/main --strategy-option=ours 2>/dev/null || git rebase --abort 2>/dev/null || true
+            git push origin main --force-with-lease
+            echo "✓ Article committed. The site rebuild workflow will run automatically."
+          else
+            echo "No changes to commit."
+          fi

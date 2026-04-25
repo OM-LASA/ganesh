@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /posts.html
+
+Sitemap: https://www.thestreamic.in/sitemap.xml

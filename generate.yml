@@ -1,0 +1,204 @@
+name: The Streamic — Full Content Pipeline
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DAILY SCHEDULE (all times UTC):
+#
+#  08:10  Full AI Run     — Gemini (220 articles, 37min) + Groq backup + build
+#  12:00  RSS Refresh     — Fetch new RSS + build (no heavy AI, stays fast)
+#  12:00  RSS Refresh     — Fetch new RSS + build
+#  20:00  Groq Top-up     — Groq card summaries for any gaps + build
+#
+# Gemini free tier: 1,500 req/day resets at midnight Pacific (08:00 UTC) → run at 08:10
+# Groq free tier: 100k tokens/day resets independently → run at 00:05 + 18:00
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    - cron: "10 8 * * *"   # 08:10 UTC daily  — Full AI run (Gemini resets at midnight Pacific = 08:00 UTC)
+    - cron: "0 12 * * *"   # 12:00 UTC daily  — RSS refresh only
+    - cron: "0 16 * * *"   # 16:00 UTC daily  — RSS refresh only
+    - cron: "0 20 * * *"   # 20:00 UTC daily  — Groq top-up + RSS
+    - cron: "30 8 * * 6"   # 08:30 UTC Saturday — Vendor Hub weekly automation
+    #                         (runs after Gemini daily quota resets at 08:00 UTC)
+    #                         IST equivalent: 14:00 IST Saturday
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "What to run"
+        required: false
+        default: "full"
+        type: choice
+        options:
+          - "full"          # Full AI + RSS + build
+          - "rss_only"      # RSS fetch + build (no AI)
+          - "groq_only"     # Groq summaries + build (no Gemini)
+          - "gemini_only"   # Gemini + build
+          - "build_only"    # Build only (no fetch, no AI)
+          - "vendor_hub"    # Generate broadcast systems hub page only
+
+permissions:
+  contents: write
+
+env:
+  SITE_BASE_URL:   "https://www.thestreamic.in"
+  NODE_VERSION:    "24"
+  PYTHON_VERSION:  "3.11"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  generate-and-build:
+    name: Generate Articles & Build Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: pip install feedparser beautifulsoup4 python-slugify requests
+
+      # ── Determine which mode to run ────────────────────────────────────────
+      # Scheduled runs: detect by hour (UTC)
+      # Manual runs: use run_mode input
+      - name: Set run mode
+        id: mode
+        run: |
+          HOUR=$(date -u +%H)
+          DOW=$(date -u +%u)   # 1=Mon … 6=Sat … 7=Sun
+          INPUT="${{ github.event.inputs.run_mode }}"
+
+          if [ -n "$INPUT" ]; then
+            MODE="$INPUT"
+          elif [ "$HOUR" = "08" ] && [ "$DOW" = "6" ]; then
+            MODE="vendor_hub"  # 08:30 UTC Saturday — weekly vendor hub
+          elif [ "$HOUR" = "08" ]; then
+            MODE="full"        # 08:10 UTC weekdays — full AI run
+          elif [ "$HOUR" = "20" ]; then
+            MODE="groq_only"   # 20:00 UTC — Groq top-up
+          else
+            MODE="rss_only"    # 12:00, 16:00 — RSS refresh
+          fi
+
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+          echo "🕐 Hour: $HOUR | Day: $DOW | Mode: $MODE"
+
+      # ── STAGE 1: Groq long-form articles (Node.js) — full + groq_only ──────
+      - name: "Stage 1: Groq long-form articles (Node.js)"
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'groq_only'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          HF_API_KEY:   ${{ secrets.GROQ_API_KEY }}
+          SITE_BASE_URL: ${{ env.SITE_BASE_URL }}
+        run: |
+          echo "🤖 Groq long-form generation (llama-3.3-70b-versatile)..."
+          node scripts/generate.js || echo "⚠ Groq Node step failed — continuing"
+
+      # ── STAGE 2: RSS fetch — full + rss_only + groq_only ──────────────────
+      - name: "Stage 2: Fetch RSS feeds"
+        if: steps.mode.outputs.mode != 'build_only' && steps.mode.outputs.mode != 'gemini_only'
+        run: |
+          python3 scripts/fetch_rss.py
+          echo "✓ RSS fetch complete"
+
+      # ── STAGE 3: Rewrite RSS → article cards ──────────────────────────────
+      - name: "Stage 3: Rewrite RSS to article cards"
+        if: steps.mode.outputs.mode != 'build_only' && steps.mode.outputs.mode != 'gemini_only'
+        run: |
+          python3 scripts/rewrite_feed.py
+          echo "✓ RSS rewrite complete"
+
+      # ── STAGE 4: Editorial deep-dives (always) ────────────────────────────
+      - name: "Stage 4: Generate editorial articles"
+        run: python3 scripts/generate_editorial.py
+
+      # ── STAGE 4b: Vendor Hub weekly automation ───────────────────────────
+      # SCHEDULE: Every Saturday at 08:30 UTC (after Gemini quota resets at 08:00 UTC)
+      # WEEKLY MODE: Generates WEEKLY_NEW=5 new vendors + refreshes 2 stale ones
+      # MANUAL FULL: Set run_mode=vendor_hub to run up to MAX_CALLS_PER_RUN=25
+      # IDEMPOTENT:  data/vendor_hub.json caches all generated briefs —
+      #              re-running only processes uncached or stale vendors
+      - name: "Stage 4b: Broadcast Systems Hub (weekly +5 vendors)"
+        if: steps.mode.outputs.mode == 'vendor_hub'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # weekly = add WEEKLY_NEW new + refresh stale (safe on quota)
+          # full   = process up to MAX_CALLS_PER_RUN (manual cold-cache run)
+          VENDOR_HUB_MODE: ${{ github.event.inputs.run_mode == 'vendor_hub' && 'full' || 'weekly' }}
+        run: |
+          echo "🏭 Vendor Hub — Mode: $VENDOR_HUB_MODE"
+          python3 scripts/generate_vendor_hub.py || echo "⚠ Vendor hub incomplete — cached vendors preserved"
+
+      # ── STAGE 5: Gemini (PRIMARY AI) — full + gemini_only ─────────────────
+      # Runs at 00:05 UTC when daily quota has just reset.
+      # Processes up to 220 articles × 2 calls × 5s = ~37 minutes.
+      - name: "Stage 5: Gemini AI articles (PRIMARY — 00:05 UTC run)"
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'gemini_only'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ENABLE_GEMINI_PREMIUM: ${{ github.event.inputs.run_mode == 'gemini_only' && 'true' || 'false' }}
+          GEMINI_MAX_PER_RUN: "2"
+        run: python3 scripts/generate_gemini.py || echo "Gemini step skipped"
+
+      # ── STAGE 5b: Groq card summaries (SECONDARY) — full + groq_only ──────
+      # Fills gaps Gemini missed. Also runs at 18:00 UTC for top-up.
+      - name: "Stage 5b: Groq card summaries (secondary + 18:00 top-up)"
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'groq_only'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_PREMIUM_ONLY: "true"
+          GROQ_MAX_PER_RUN: "4"
+        run: python3 ./scripts/generate_summaries.py || echo "Groq step skipped"
+
+      # ── STAGE 6: Build static site (always) ───────────────────────────────
+      - name: "Stage 6: Build static site"
+        run: |
+          python3 scripts/build.py
+          echo "✓ Build complete"
+          echo "Pages:    $(find docs -maxdepth 1 -name '*.html' | wc -l)"
+          echo "Articles: $(find docs/articles -name '*.html' 2>/dev/null | wc -l)"
+
+      # ── STAGE 7: Verify ────────────────────────────────────────────────────
+      - name: Verify build output
+        run: |
+          test -f docs/index.html    || (echo "❌ index.html missing"   && exit 1)
+          test -f docs/featured.html || (echo "❌ featured.html missing" && exit 1)
+          test -f docs/posts.html    || (echo "❌ posts.html missing"    && exit 1)
+          test -f docs/sitemap.xml   || (echo "❌ sitemap.xml missing"   && exit 1)
+          echo "✅ All required files present"
+
+      # ── STAGE 8: Commit ────────────────────────────────────────────────────
+      - name: Commit generated content
+        run: |
+          git config user.name  "Streamic Bot"
+          git config user.email "technodate3@gmail.com"
+
+          git add -A docs/ data/
+          git add posts.html sitemap.xml featured.html index.html 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "build: auto-refresh [$(date -u +%H:%M) UTC] [skip ci]"
+            git fetch origin main
+            git merge origin/main --no-edit -s recursive -X ours 2>/dev/null || \
+              git merge origin/main --no-edit || true
+            git push origin main
+            echo "✅ Committed and pushed"
+          fi

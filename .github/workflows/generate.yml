@@ -1,0 +1,108 @@
+name: The Streamic — Build &amp; Deploy
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FULLY EDITORIAL MODE — 100% manually curated content pipeline
+# ═══════════════════════════════════════════════════════════════════════════
+# This workflow builds the static site from hand-curated editorial data.
+# All automatic content generation has been permanently removed.
+#
+# WHAT RUNS:
+#   • scripts/assign_images.py — assigns local taxonomy images to articles
+#   • build.py — renders docs/ from data/generated_articles.json
+#   • sitemap.xml is regenerated automatically inside build.py
+#
+# HOW TO ADD CONTENT:
+#   1. Edit data/generated_articles.json directly (or via the admin dashboard
+#      at /admin.html, which commits to the same file).
+#   2. Push to main → this workflow runs → site rebuilds.
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/generated_articles.json'
+      - 'articles/**'
+      - 'scripts/build.py'
+      - 'build.py'
+      - 'docs/**.html'
+      - '.github/workflows/generate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SITE_BASE_URL:  "https://www.thestreamic.in"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build:
+    name: Build Static Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: pip install beautifulsoup4 python-slugify
+
+      # ── Assign local images to articles (runs BEFORE build.py) ──────────
+      - name: "Stage 5c: Assign taxonomy images (flat layout)"
+        run: |
+          if [ -f scripts/assign_images.py ]; then
+            python3 scripts/assign_images.py || echo "⚠ Image assigner returned non-zero (non-fatal)"
+          else
+            echo "○ scripts/assign_images.py not found, skipping"
+          fi
+
+      # ── Build the site ───────────────────────────────────────────────────
+      - name: Build static site
+        run: |
+          if [ -f scripts/build.py ]; then
+            python3 scripts/build.py
+          else
+            python3 build.py
+          fi
+          echo "✓ Build complete"
+          echo "Pages:    $(find docs -maxdepth 1 -name '*.html' | wc -l)"
+          echo "Articles: $(find docs/articles -name '*.html' 2>/dev/null | wc -l)"
+
+      # ── Verify output ────────────────────────────────────────────────────
+      - name: Verify build output
+        run: |
+          test -f docs/index.html    || (echo "❌ index.html missing"    && exit 1)
+          test -f docs/featured.html || (echo "❌ featured.html missing" && exit 1)
+          test -f docs/posts.html    || (echo "❌ posts.html missing"    && exit 1)
+          test -f docs/sitemap.xml   || (echo "❌ sitemap.xml missing"   && exit 1)
+          echo "✅ All required files present"
+
+      # ── Commit rebuilt output ────────────────────────────────────────────
+      - name: Commit build output
+        run: |
+          git config user.name  "Streamic Bot"
+          git config user.email "technodate3@gmail.com"
+
+          git add -A docs/
+          git add posts.html sitemap.xml featured.html index.html 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "build: site rebuild [$(date -u +%Y-%m-%d\ %H:%M) UTC] [skip ci]"
+            git fetch origin main
+            git merge origin/main --no-edit -s recursive -X ours 2>/dev/null || \
+              git merge origin/main --no-edit || true
+            git push origin main
+            echo "✅ Committed and pushed"
+          fi

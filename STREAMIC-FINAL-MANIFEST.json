@@ -1,0 +1,17 @@
+{
+  "package_name": "streamic-final-fixed-adsense-ready-package.zip",
+  "included_new_articles": 10,
+  "total_root_article_files": 25,
+  "generated_articles_json_items": 88,
+  "homepage_section_title": "The Streamic Intelligence",
+  "key_fixes": [
+    "10 new premium article HTML files included",
+    "cleaned active article dataset retained in data/generated_articles.json and data/news.json",
+    "homepage and featured pages renamed to The Streamic Intelligence",
+    "mobile hamburger menu refined in main.js and docs/main.js",
+    "contact form changed from broken mailto flow to FormSubmit",
+    "build.py and scripts/build.py updated so future rebuilds keep the fixes",
+    "root and docs copies included for easy overwrite"
+  ],
+  "contact_form_note": "First live submission triggers a one-time FormSubmit activation email to technodate3@gmail.com."
+}
