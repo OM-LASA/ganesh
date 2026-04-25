@@ -776,14 +776,19 @@ def _fix_article_images(arts):
         # PRIORITY 1: local taxonomy image from assign_images.py if present.
         # These are deterministic, copyright-safe local files matched to
         # the article's topic by the Streamic visual taxonomy.
+        # SAFETY: only apply if the file actually exists on disk — a missing
+        # taxonomy file must never override a valid image_url.
         taxonomy_img = a.get("image") or ""
         if taxonomy_img and taxonomy_img.startswith("/assets/images/"):
-            a["image_url"] = taxonomy_img
-            a["image_credit"] = "The Streamic"
-            a["image_license"] = "Site License"
-            a["image_license_url"] = ""
-            taxonomy_applied += 1
-            continue
+            taxonomy_disk = os.path.join(DOCS, taxonomy_img.lstrip("/"))
+            if os.path.isfile(taxonomy_disk):
+                a["image_url"] = taxonomy_img
+                a["image_credit"] = "The Streamic"
+                a["image_license"] = "Site License"
+                a["image_license_url"] = ""
+                taxonomy_applied += 1
+                continue
+            # File missing — fall through so image_url is used as-is
 
         img = a.get("image_url", "") or ""
 
