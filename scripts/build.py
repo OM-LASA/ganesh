@@ -736,25 +736,24 @@ def _image_is_from_pool(url: str) -> bool:
     return pid in _POOL_IDS
 
 def _fix_article_images(arts):
-    """Enforce broadcast-image policy across ALL article records.
+    """Resolve final image_url for every article using strict priority order.
 
-    Copyright rule: third-party thumbnails (TV Technology, Motionographer,
-    Haivision, vendor PR photos, etc.) are never shipped on the live site.
-    Every image_url must resolve to an entry in the curated _BROADCAST_IMAGES
-    pool on images.unsplash.com, which Streamic licenses via Unsplash terms.
+    Priority:
+      1. Manual articles (_source=="manual"): image_url already set correctly
+         by load_manual_articles() — confirmed on disk. Preserve as-is.
+      2. Generated articles: use image_url if it is a valid Unsplash pool URL
+         or a local /assets/ file that exists on disk.
+      3. Fallback: generated "image" field ONLY if the file exists on disk
+         AND it is not the broken /assets/images/_fallback/streamic-default.jpg.
+      4. Last resort: /assets/fallback.jpg.
 
-    Rules applied in order:
-      1. Any non-pool image (external CDN, vendor press photo,
-         blacklisted ID, empty, or malformed) is replaced with a pool image.
-      2. Any pool image already used in this run is replaced so the homepage
-         and category pages never show the same visual twice in a row.
-      3. Replacements are drawn round-robin from _BROADCAST_IMAGES for a
-         stable, deterministic distribution across the ~35 visible slugs.
+    Unsplash pool deduplication still applies to generated articles that use
+    pool images, so the homepage never shows the same Unsplash photo twice.
     """
     used_images = set()
     pool_idx = 0
 
-    def _next_image():
+    def _next_pool_image():
         nonlocal pool_idx
         for _ in range(len(_BROADCAST_IMAGES)):
             img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
@@ -762,72 +761,87 @@ def _fix_article_images(arts):
             if img_id not in used_images:
                 used_images.add(img_id)
                 return _unsplash_url(img_id)
-        # All pool IDs consumed — reset and continue round-robin.
         used_images.clear()
         img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
         pool_idx += 1
         used_images.add(img_id)
         return _unsplash_url(img_id)
 
-    replaced_non_pool = 0
-    replaced_duplicate = 0
-    taxonomy_applied = 0
+    def _local_exists(path):
+        """True if path is a /assets/... path and the file exists under docs/."""
+        if not path:
+            return False
+        p = path if path.startswith("/") else "/" + path
+        return os.path.isfile(os.path.join(DOCS, p.lstrip("/")))
+
+    BROKEN_FALLBACK = "/assets/images/_fallback/streamic-default.jpg"
+
+    replaced = 0
     for a in arts:
-        # PRIORITY 1: local taxonomy image from assign_images.py if present.
-        # These are deterministic, copyright-safe local files matched to
-        # the article's topic by the Streamic visual taxonomy.
-        # SAFETY: only apply if the file actually exists on disk — a missing
-        # taxonomy file must never override a valid image_url.
-        taxonomy_img = a.get("image") or ""
-        if taxonomy_img and taxonomy_img.startswith("/assets/images/"):
-            taxonomy_disk = os.path.join(DOCS, taxonomy_img.lstrip("/"))
-            if os.path.isfile(taxonomy_disk):
-                a["image_url"] = taxonomy_img
-                a["image_credit"] = "The Streamic"
-                a["image_license"] = "Site License"
-                a["image_license_url"] = ""
-                taxonomy_applied += 1
+        # ── PRIORITY 1: manual article ────────────────────────────────────
+        # load_manual_articles() already resolved image_url to a confirmed
+        # on-disk path or /assets/fallback.jpg. Nothing to do.
+        if a.get("_source") == "manual":
+            a.setdefault("image_credit",     "The Streamic")
+            a.setdefault("image_license",    "Site Asset")
+            a.setdefault("image_license_url","")
+            continue
+
+        # ── PRIORITY 2: generated article — try image_url first ───────────
+        img_url = (a.get("image_url") or "").strip()
+
+        # 2a. Local /assets/ image_url — only if file exists on disk
+        if (img_url.startswith("/assets/") or img_url.startswith("assets/")):
+            if _local_exists(img_url):
+                a["image_credit"]      = a.get("image_credit") or "The Streamic"
+                a["image_license"]     = a.get("image_license") or "Site Asset"
+                a["image_license_url"] = a.get("image_license_url") or ""
                 continue
-            # File missing — fall through so image_url is used as-is
+            # Local path but file missing — fall through
 
-        img = a.get("image_url", "") or ""
+        # 2b. Unsplash pool image_url
+        if _image_is_from_pool(img_url):
+            try:
+                photo_id = "photo-" + img_url.split("photo-", 1)[1].split("?", 1)[0]
+            except IndexError:
+                photo_id = ""
+            if photo_id and photo_id not in used_images:
+                used_images.add(photo_id)
+                a["image_credit"]      = "Unsplash"
+                a["image_license"]     = "Unsplash License"
+                a["image_license_url"] = "https://unsplash.com/license"
+                continue
+            elif photo_id:
+                # Duplicate pool image — assign next pool image
+                a["image_url"]         = _next_pool_image()
+                a["image_credit"]      = "Unsplash"
+                a["image_license"]     = "Unsplash License"
+                a["image_license_url"] = "https://unsplash.com/license"
+                replaced += 1
+                continue
 
-        # Preserve approved local site assets used for curated hero/editorial art.
-        if img.startswith("/assets/") or img.startswith("assets/"):
-            a["image_credit"] = a.get("image_credit") or "The Streamic"
-            a["image_license"] = a.get("image_license") or "Site Asset"
-            a["image_license_url"] = a.get("image_license_url") or ""
+        # ── PRIORITY 3: "image" field only if valid local file exists ─────
+        # Ignore the broken fallback path that pollutes generated JSON.
+        img_field = (a.get("image") or "").strip()
+        if (img_field
+                and img_field != BROKEN_FALLBACK
+                and img_field.startswith("/assets/")
+                and _local_exists(img_field)):
+            a["image_url"]         = img_field
+            a["image_credit"]      = "The Streamic"
+            a["image_license"]     = "Site Asset"
+            a["image_license_url"] = ""
             continue
 
-        if not _image_is_from_pool(img):
-            # Non-pool image (external/vendor/invalid) — force replacement.
-            a["image_url"] = _next_image()
-            # Attribution: pool images are Unsplash-licensed.
-            a["image_credit"] = "Unsplash"
-            a["image_license"] = "Unsplash License"
-            a["image_license_url"] = "https://unsplash.com/license"
-            replaced_non_pool += 1
-            continue
+        # ── PRIORITY 4: assign next Unsplash pool image ───────────────────
+        a["image_url"]         = _next_pool_image()
+        a["image_credit"]      = "Unsplash"
+        a["image_license"]     = "Unsplash License"
+        a["image_license_url"] = "https://unsplash.com/license"
+        replaced += 1
 
-        # Pool image — track uniqueness; replace if already used in this run.
-        try:
-            photo_id = "photo-" + img.split("photo-", 1)[1].split("?", 1)[0]
-        except IndexError:
-            photo_id = ""
-
-        if photo_id and photo_id in used_images:
-            a["image_url"] = _next_image()
-            a["image_credit"] = "Unsplash"
-            a["image_license"] = "Unsplash License"
-            a["image_license_url"] = "https://unsplash.com/license"
-            replaced_duplicate += 1
-        elif photo_id:
-            used_images.add(photo_id)
-
-    total = replaced_non_pool + replaced_duplicate
-    if total:
-        print(f"  Image fixer: {total} images normalized to broadcast pool "
-              f"({replaced_non_pool} non-pool, {replaced_duplicate} duplicates)")
+    if replaced:
+        print(f"  Image fixer: {replaced} generated articles assigned pool images")
 
 
 def _hp_img(a, base=""):
@@ -2980,13 +2994,16 @@ def sitemap(arts):
 #     so _fix_article_images() preserves it. Falls back to /assets/fallback.jpg.
 #   - Slugs already present in generated_articles.json are skipped (no duplicates).
 
-def load_manual_articles(existing_slugs):
+def load_manual_articles():
     """Return list of article dicts from data/manual_articles.json.
 
-    existing_slugs: set of slugs already loaded from generated_articles.json.
+    Manual articles always override generated_articles.json on slug collision.
+    Image resolution priority:
+      1. entry["image"] if file exists on disk under docs/
+      2. /assets/fallback.jpg
+    Each returned dict carries _source="manual" for build-log reporting.
     """
     if not os.path.isfile(MANUAL_F):
-        # Nothing to load — not an error.
         return []
 
     try:
@@ -3006,20 +3023,14 @@ def load_manual_articles(existing_slugs):
             skipped += 1
             continue
 
-        # Only published entries
         if entry.get("status") != "published":
             skipped += 1
             continue
 
-        # Skip if already in generated_articles.json
-        if slug in existing_slugs:
-            skipped += 1
-            continue
-
-        # Article HTML must exist
+        # Article HTML must exist in docs/articles/
         html_path = os.path.join(ARTS_D, f"{slug}.html")
         if not os.path.isfile(html_path):
-            print(f"  ⚠ manual article '{slug}': docs/articles/{slug}.html not found — skipped")
+            print(f"  ⚠ manual '{slug}': docs/articles/{slug}.html not found — skipped")
             skipped += 1
             continue
 
@@ -3028,43 +3039,48 @@ def load_manual_articles(existing_slugs):
         category = (entry.get("category") or "ai-post-production").strip()
         desc     = (entry.get("description") or "").strip()
 
-        # Image: must be a local /assets/ path so _fix_article_images preserves it.
-        img = (entry.get("image") or "").strip()
-        if img and not img.startswith("/"):
-            img = "/" + img          # ensure leading slash
-        # Verify the file actually exists under docs/
-        if img:
-            img_disk = os.path.join(DOCS, img.lstrip("/"))
-            if not os.path.isfile(img_disk):
-                img = ""             # file missing — fall through to fallback
+        # ── Image resolution (manual articles) ───────────────────────────
+        # Priority 1: "image" field if local /assets/ file exists on disk.
+        # Priority 2: /assets/fallback.jpg (always present).
+        raw_img = (entry.get("image") or "").strip()
+        if raw_img and not raw_img.startswith("/"):
+            raw_img = "/" + raw_img
+        img = ""
+        if raw_img:
+            img_disk = os.path.join(DOCS, raw_img.lstrip("/"))
+            if os.path.isfile(img_disk):
+                img = raw_img          # confirmed on disk
+            else:
+                print(f"  ⚠ manual '{slug}': image {raw_img!r} not found on disk — using fallback")
         if not img:
             img = "/assets/fallback.jpg"
 
         results.append({
-            "slug":             slug,
-            "title":            title,
-            "published":        date,
-            "category":         category,
-            "dek":              desc,
-            "meta_description": desc,
-            "card_summary":     desc,
-            "image_url":        img,
-            "image_credit":     "The Streamic",
-            "image_license":    "Site Asset",
+            "slug":              slug,
+            "title":             title,
+            "published":         date,
+            "category":          category,
+            "dek":               desc,
+            "meta_description":  desc,
+            "card_summary":      desc,
+            "image_url":         img,
+            "image_credit":      "The Streamic",
+            "image_license":     "Site Asset",
             "image_license_url": "",
-            "word_count":       900,
-            "generated_by":     "gpt_manual_editorial",
-            "is_editorial":     True,
-            "editorial":        True,
-            "source_url":       "",
-            "source_domain":    "The Streamic",
-            "quality_score":    90,
-            "body_html":        f"<p>{desc}</p>" if desc else "",
+            "word_count":        900,
+            "generated_by":      "gpt_manual_editorial",
+            "is_editorial":      True,
+            "editorial":         True,
+            "source_url":        "",
+            "source_domain":     "The Streamic",
+            "quality_score":     90,
+            "body_html":         f"<p>{desc}</p>" if desc else "",
+            "_source":           "manual",   # build-log tag — not rendered
         })
 
     if results:
-        print(f"  ✓ manual_articles.json: {len(results)} articles loaded"
-              f"{f' ({skipped} skipped)' if skipped else ''}")
+        print(f"  ✓ manual_articles.json: {len(results)} loaded"
+              f"{f', {skipped} skipped' if skipped else ''}")
     elif skipped:
         print(f"  ℹ manual_articles.json: 0 loaded, {skipped} skipped")
 
@@ -3169,13 +3185,33 @@ def main():
     print(f"  After near-dup dedup: {len(arts)} unique articles "
           f"(removed {dropped_near_dup} near-duplicates)")
 
-    # ── Merge hand-authored articles from manual_articles.json ───────────
-    _existing_slugs = {a["slug"] for a in arts}
-    _manual = load_manual_articles(_existing_slugs)
-    if _manual:
-        arts = _manual + arts   # manual articles prepended → newest-first sort later
-        arts.sort(key=lambda a: a.get("published", ""), reverse=True)
-        print(f"  After manual merge: {len(arts)} total articles")
+    # ── Merge manual_articles.json (overrides generated on slug collision) ──
+    # Rules:
+    #   1. Load generated_articles.json first (already in `arts`).
+    #   2. Load manual_articles.json — manual wins on any slug collision.
+    #   3. Sort combined list newest-first.
+    #   4. Print which source each article came from for build transparency.
+    generated_arts = arts   # renamed for clarity
+    manual_arts    = load_manual_articles()
+
+    by_slug = {}
+    # Load generated first — lower priority
+    for a in generated_arts:
+        by_slug[a.get("slug", "")] = a
+    # Manual overrides generated on collision
+    for a in manual_arts:
+        by_slug[a.get("slug", "")] = a
+
+    arts = sorted(by_slug.values(), key=lambda a: a.get("published", ""), reverse=True)
+
+    # Log source of each article for transparency
+    m_slugs = {a.get("slug") for a in manual_arts}
+    manual_count    = sum(1 for a in arts if a.get("slug") in m_slugs)
+    generated_count = len(arts) - manual_count
+    print(f"  Merged: {manual_count} manual + {generated_count} generated = {len(arts)} total")
+    for a in arts:
+        src = "manual" if a.get("slug") in m_slugs else "generated"
+        print(f"    [{src}] {a.get('slug','')[:65]}")
 
     # ── Ensure all articles have a slug ──────────────────────────────────
     def _slugify(title):
