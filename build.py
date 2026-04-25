@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 ROOT      = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ARTS_F    = os.path.join(ROOT, "data", "generated_articles.json")
+MANUAL_F  = os.path.join(ROOT, "data", "manual_articles.json")
 DOCS      = os.path.join(ROOT, "docs")
 ARTS_D    = os.path.join(DOCS, "articles")
 BASE_URL  = os.environ.get("SITE_BASE_URL", "https://www.thestreamic.in").rstrip("/")
@@ -657,189 +658,200 @@ def is_high_value(article: dict) -> bool:
     # Any article with a title passes (never blank)
     return bool(article.get("title", "").strip())
 
-# ── BROADCAST IMAGE SYSTEM ──────────────────────────────────────────────────
-# Curated Unsplash images: server rooms, control rooms, vision mixers, cameras,
-# edit suites, studio equipment, network infrastructure. NO typewriters, newspapers.
+# ── LOCAL IMAGE SYSTEM ───────────────────────────────────────────────────────
+# ALL images served from docs/assets/. NO Unsplash, NO external URLs.
+# assign_images.py populates image fields. build.py resolves from local disk.
 
-_BAD_IMAGE_IDS = {
-    "photo-1495020689067-958852a7765e",   # person reading newspaper
-    "photo-1504711434969-e33886168f5c",   # newspaper stack
-    "photo-1432821596592-e2c18b78144f",   # TYPEWRITER
-    "photo-1453738773917-9c3eff1db985",   # old newspaper on wooden desk
-    "photo-1557804506-669a67965ba0",      # generic business meeting room
+_RESERVED_ASSETS = {
+    "logo.png", "fallback.jpg",
+    "gfx-hero-nab-floor.png", "gfx-hero-nab-floor.jpg",
+    "hero-broadcast-male.png",
+    "nab-show-banner-news-headline-hero.png",
+    "insight-quic-infographic.jpg",
+    "neil-sadwelkar.jpg",
+    "studio-grade-ott-workflow-2026.png",
 }
 
-# 30 unique broadcast/media IT images — no repeats, all relevant
-_BROADCAST_IMAGES = [
-    # Server rooms & data centers
-    "photo-1558494949-ef010cbdcc31",      # server room blue LED racks
-    "photo-1544197150-b99a580bb7a8",      # data center corridor
-    "photo-1573164713988-8665fc963095",   # fiber optic cables glowing
-    "photo-1504384308090-c894fdcc538d",   # server room ceiling view
-    "photo-1451187580459-43490279c0fa",   # global network data visualization
-    # Broadcast control rooms & production
-    "photo-1598488035139-bdbb2231ce04",   # audio/broadcast mixing console
-    "photo-1478737270239-2f02b77fc618",   # control room buttons & panels
-    "photo-1524253482453-3fed8d2fe12b",   # video editing workstation
-    "photo-1616401784845-180882ba9ba8",   # camera / video production gear
-    "photo-1492619375914-88005aa9e8fb",   # video production multi-cam setup
-    # Post-production & edit suites
-    "photo-1535016120720-40c646be5580",   # video editing timeline on monitor
-    "photo-1547658719-da2b51169166",      # multi-monitor edit workstation
-    "photo-1605106702734-205df224ecce",   # VFX / tech screen
-    "photo-1581092918056-0c4c3acd3789",   # tech lab equipment
-    "photo-1611532736597-de2d4265fba3",   # broadcast / streaming setup
-    # AI & technology
-    "photo-1677442135703-1787eea5ce01",   # AI neural network visualization
-    "photo-1620712943543-bcc4688e7485",   # AI / machine learning
-    "photo-1593642632559-0c6d3fc62b89",   # circuit board close-up
-    "photo-1518770660439-4636190af475",   # circuit board macro
-    "photo-1515879218367-8466d910aaa4",   # code on dark screen
-    # Network & infrastructure
-    "photo-1545987796-200677ee1011",      # network fiber connections
-    "photo-1551288049-bebda4e38f71",      # data analytics dashboard
-    "photo-1504639725590-34d0984388bd",   # programming / code screen
-    "photo-1516321497487-e288fb19713f",   # tech workspace monitors
-    "photo-1497366754035-f200968a6e72",   # modern tech office
-    # Streaming & media
-    "photo-1586788680434-30d324b2d46f",   # live streaming / video
-    "photo-1560472355-536de3962603",      # video / media content
-    "photo-1561736778-92e52a7769ef",      # graphics workstation
-    "photo-1516321318423-f06f85e504b3",   # monitoring screens
-    "photo-1517694712202-14dd9538aa97",   # tech laptop workspace
-]
+# Category → preferred local image (meaningful editorial match)
+_CAT_IMAGE = {
+    "ai-post-production":        "media-composer-edit.png",
+    "infrastructure":             "cables.png",
+    "newsroom":                   "newsroom-anchor.png",
+    "cloud":                      "ms-server-data-center.png",
+    "playout":                    "pcr-room.png",
+    "graphics":                   "studio-image-4.png",
+    "streaming":                  "the-streamic-studio-2.png",
+    "featured":                   "the-streamic-studio-1.png",
+    "post-production-workflows":  "avid-setup-audio.png",
+    "insights":                   "production-room-of-news.png",
+    "editorsdesk":                "abstracts.png",
+}
 
+
+def _local_image_exists(url: str) -> bool:
+    """True if a /assets/... path resolves to a real file under docs/."""
+    if not url:
+        return False
+    rel = url.lstrip("/")
+    return os.path.isfile(os.path.join(DOCS, rel))
+
+
+def _scan_local_images() -> list:
+    """Return list of /assets/filename.ext for every usable image in docs/assets/.
+    Reflects what's actually on disk at build time."""
+    found = []
+    try:
+        for fn in sorted(os.listdir(os.path.join(DOCS, "assets"))):
+            if not fn.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                continue
+            if fn in _RESERVED_ASSETS:
+                continue
+            # Skip uppercase originals if a sanitized lowercase copy exists
+            sanitized = fn.lower().replace(" ", "-").replace("(", "").replace(")", "")
+            if fn != sanitized and os.path.isfile(os.path.join(DOCS, "assets", sanitized)):
+                continue
+            found.append(f"/assets/{fn}")
+    except Exception:
+        pass
+    return found if found else ["/assets/fallback.jpg"]
+
+
+def _best_local_image_for(a: dict, pool: list, used: set) -> str:
+    """Pick the best unused local image for an article.
+    Priority: category-default → round-robin from pool → fallback.jpg"""
+    cat = (a.get("category") or "featured").lower()
+    pref = _CAT_IMAGE.get(cat)
+    if pref:
+        pref_url = f"/assets/{pref}"
+        if _local_image_exists(pref_url) and pref_url not in used:
+            used.add(pref_url)
+            return pref_url
+    for img in pool:
+        if img not in used:
+            used.add(img)
+            return img
+    used.clear()
+    if pool:
+        used.add(pool[0])
+        return pool[0]
+    return "/assets/fallback.jpg"
+
+
+# Backward-compat stubs (legacy code paths reference these — safe to keep)
 def _unsplash_url(photo_id):
-    return f"https://images.unsplash.com/{photo_id}?w=1200&auto=format&fit=crop&q=80"
+    return "/assets/fallback.jpg"
 
 def _is_bad_image(url):
-    """Check if an image URL is in the blacklist."""
     if not url:
         return True
-    return any(bad_id in url for bad_id in _BAD_IMAGE_IDS)
-
-_POOL_IDS = set(_BROADCAST_IMAGES)
+    return url.startswith("http://") or url.startswith("https://")
 
 def _image_is_from_pool(url: str) -> bool:
-    """True only if URL is an images.unsplash.com link to a pool photo ID."""
-    if not url:
-        return False
-    if "images.unsplash.com" not in url:
-        return False
-    if "photo-" not in url:
-        return False
-    try:
-        pid = "photo-" + url.split("photo-", 1)[1].split("?", 1)[0]
-    except IndexError:
-        return False
-    return pid in _POOL_IDS
+    return False   # Unsplash pool is retired — local images only
+
 
 def _fix_article_images(arts):
-    """Enforce broadcast-image policy across ALL article records.
+    """Resolve final image_url for every article — LOCAL IMAGES ONLY.
 
-    Copyright rule: third-party thumbnails (TV Technology, Motionographer,
-    Haivision, vendor PR photos, etc.) are never shipped on the live site.
-    Every image_url must resolve to an entry in the curated _BROADCAST_IMAGES
-    pool on images.unsplash.com, which Streamic licenses via Unsplash terms.
+    No Unsplash. No external URLs. Every card shows a file from docs/assets/.
 
-    Rules applied in order:
-      1. Any non-pool image (external CDN, vendor press photo,
-         blacklisted ID, empty, or malformed) is replaced with a pool image.
-      2. Any pool image already used in this run is replaced so the homepage
-         and category pages never show the same visual twice in a row.
-      3. Replacements are drawn round-robin from _BROADCAST_IMAGES for a
-         stable, deterministic distribution across the ~35 visible slugs.
+    Priority per article:
+      1. Manual article (_source=="manual"): preserve image_url already
+         confirmed on disk by load_manual_articles().
+      2. Existing image_url if it is a local /assets/ path that exists on disk
+         (and is not the broken /assets/images/_fallback/streamic-default.jpg).
+      3. The "image" field if it is a local /assets/ path that exists on disk
+         (and is not the broken _fallback stub).
+      4. Assign from local pool: category-preferred, then round-robin.
+      5. Hard fallback: /assets/fallback.jpg.
+
+    After processing, every article.image_url is guaranteed to be a local path.
     """
-    used_images = set()
-    pool_idx = 0
+    BROKEN = "/assets/images/_fallback/streamic-default.jpg"
+    pool = _scan_local_images()
+    used: set = set()
 
-    def _next_image():
-        nonlocal pool_idx
-        for _ in range(len(_BROADCAST_IMAGES)):
-            img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
-            pool_idx += 1
-            if img_id not in used_images:
-                used_images.add(img_id)
-                return _unsplash_url(img_id)
-        # All pool IDs consumed — reset and continue round-robin.
-        used_images.clear()
-        img_id = _BROADCAST_IMAGES[pool_idx % len(_BROADCAST_IMAGES)]
-        pool_idx += 1
-        used_images.add(img_id)
-        return _unsplash_url(img_id)
+    local_assigned = 0
+    fallback_used  = 0
 
-    replaced_non_pool = 0
-    replaced_duplicate = 0
-    taxonomy_applied = 0
     for a in arts:
-        # PRIORITY 1: local taxonomy image from assign_images.py if present.
-        # These are deterministic, copyright-safe local files matched to
-        # the article's topic by the Streamic visual taxonomy.
-        taxonomy_img = a.get("image") or ""
-        if taxonomy_img and taxonomy_img.startswith("/assets/images/"):
-            a["image_url"] = taxonomy_img
-            a["image_credit"] = "The Streamic"
-            a["image_license"] = "Site License"
-            a["image_license_url"] = ""
-            taxonomy_applied += 1
+        # PRIORITY 1: manual article — already resolved
+        if a.get("_source") == "manual":
+            a.setdefault("image_credit",     "The Streamic")
+            a.setdefault("image_license",    "Site Asset")
+            a.setdefault("image_license_url","")
+            img = a.get("image_url", "")
+            if img and img != "/assets/fallback.jpg":
+                used.add(img)
             continue
 
-        img = a.get("image_url", "") or ""
-
-        # Preserve approved local site assets used for curated hero/editorial art.
-        if img.startswith("/assets/") or img.startswith("assets/"):
-            a["image_credit"] = a.get("image_credit") or "The Streamic"
-            a["image_license"] = a.get("image_license") or "Site Asset"
+        # PRIORITY 2: existing image_url if valid local file
+        img_url = (a.get("image_url") or "").strip()
+        if (img_url
+                and img_url != BROKEN
+                and not img_url.startswith("http")
+                and (img_url.startswith("/assets/") or img_url.startswith("assets/"))
+                and _local_image_exists(img_url)):
+            a["image_url"]         = "/" + img_url.lstrip("/")
+            a["image_credit"]      = a.get("image_credit") or "The Streamic"
+            a["image_license"]     = a.get("image_license") or "Site Asset"
             a["image_license_url"] = a.get("image_license_url") or ""
+            used.add(a["image_url"])
             continue
 
-        if not _image_is_from_pool(img):
-            # Non-pool image (external/vendor/invalid) — force replacement.
-            a["image_url"] = _next_image()
-            # Attribution: pool images are Unsplash-licensed.
-            a["image_credit"] = "Unsplash"
-            a["image_license"] = "Unsplash License"
-            a["image_license_url"] = "https://unsplash.com/license"
-            replaced_non_pool += 1
+        # PRIORITY 3: "image" field if valid local file
+        img_field = (a.get("image") or "").strip()
+        if (img_field
+                and img_field != BROKEN
+                and not img_field.startswith("http")
+                and (img_field.startswith("/assets/") or img_field.startswith("assets/"))
+                and _local_image_exists(img_field)):
+            a["image_url"]         = "/" + img_field.lstrip("/")
+            a["image_credit"]      = "The Streamic"
+            a["image_license"]     = "Site Asset"
+            a["image_license_url"] = ""
+            used.add(a["image_url"])
             continue
 
-        # Pool image — track uniqueness; replace if already used in this run.
-        try:
-            photo_id = "photo-" + img.split("photo-", 1)[1].split("?", 1)[0]
-        except IndexError:
-            photo_id = ""
+        # PRIORITY 4: assign from local pool
+        if pool and pool != ["/assets/fallback.jpg"]:
+            chosen = _best_local_image_for(a, pool, used)
+            a["image_url"]         = chosen
+            a["image_credit"]      = "The Streamic"
+            a["image_license"]     = "Site Asset"
+            a["image_license_url"] = ""
+            local_assigned += 1
+            continue
 
-        if photo_id and photo_id in used_images:
-            a["image_url"] = _next_image()
-            a["image_credit"] = "Unsplash"
-            a["image_license"] = "Unsplash License"
-            a["image_license_url"] = "https://unsplash.com/license"
-            replaced_duplicate += 1
-        elif photo_id:
-            used_images.add(photo_id)
+        # PRIORITY 5: hard fallback
+        a["image_url"]         = "/assets/fallback.jpg"
+        a["image_credit"]      = "The Streamic"
+        a["image_license"]     = "Site Asset"
+        a["image_license_url"] = ""
+        fallback_used += 1
 
-    total = replaced_non_pool + replaced_duplicate
-    if total:
-        print(f"  Image fixer: {total} images normalized to broadcast pool "
-              f"({replaced_non_pool} non-pool, {replaced_duplicate} duplicates)")
+    if local_assigned:
+        print(f"  Image fixer: {local_assigned} articles assigned local images from pool")
+    if fallback_used:
+        print(f"  Image fixer: {fallback_used} articles using fallback.jpg")
+    ext = [a.get("image_url","") for a in arts if (a.get("image_url","") or "").startswith("http")]
+    if ext:
+        print(f"  ⚠ WARNING: {len(ext)} articles still have external image_url")
 
 
 def _hp_img(a, base=""):
-    img = eu(a.get("image_url", "") or a.get("image", ""))
-    if img:
-        return img
+    """Resolve a card image URL — LOCAL ONLY, no external URLs."""
+    img = (a.get("image_url", "") or a.get("image", "") or "").strip()
+    if img and not img.startswith("http") and (img.startswith("/assets/") or img.startswith("assets/")):
+        if _local_image_exists(img):
+            return img if img.startswith("/") else "/" + img
     cat = (a.get("category") or "featured").lower()
-    fallbacks = {
-        "featured": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80",
-        "newsroom": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&auto=format&fit=crop&q=80",
-        "cloud": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&auto=format&fit=crop&q=80",
-        "infrastructure": "https://images.unsplash.com/photo-1545987796-200677ee1011?w=1200&auto=format&fit=crop&q=80",
-        "graphics": "https://images.unsplash.com/photo-1547658719-da2b51169166?w=1200&auto=format&fit=crop&q=80",
-        "streaming": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&auto=format&fit=crop&q=80",
-        "ai-post-production": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&auto=format&fit=crop&q=80",
-        "playout": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80",
-    }
-    return fallbacks.get(cat, fallbacks["featured"])
+    pref = _CAT_IMAGE.get(cat, "the-streamic-studio-1.png")
+    pref_url = f"/assets/{pref}"
+    if _local_image_exists(pref_url):
+        return pref_url
+    return "/assets/fallback.jpg"
+
 
 def _hp_tag(a):
     cinfo = CAT.get(a.get("category", "featured"), CAT["featured"])
@@ -878,77 +890,238 @@ def _hp_guide_card(a, sub):
 def _source_name(val):
     return (val or '').replace('https://','').replace('http://','').replace('www.','').split('/')[0]
 
-def load_homepage_feed(arts, limit=14):
-    """Load homepage cards from editorial corpus, mapped to internal articles.
-    
-    Only returns items that map to an internal article (has slug) so all
-    homepage links go to our own analysis pages, never to external sources.
-    Prefers articles with more body content (longer = higher quality).
-    """
-    by_url, by_title = {}, {}
-    for a in arts:
-        for key in (a.get('source_url'), a.get('url'), a.get('link')):
-            if key:
-                by_url[key] = a
-        title = (a.get('title') or '').strip().lower()
-        if title:
-            by_title[title] = a
+# ── Streamic Intelligence helpers ─────────────────────────────────────────────
 
-    feed_items = []
-    if os.path.exists(NEWS_F):
-        with open(NEWS_F, 'r', encoding='utf-8') as f:
-            raw = json.load(f)
-        if isinstance(raw, dict) and 'items' in raw:
-            feed_items = (raw.get('featured_priority') or []) + (raw.get('items') or [])
-        elif isinstance(raw, list):
-            feed_items = raw
+def _plain_text(html):
+    """Strip HTML tags and collapse whitespace to plain text."""
+    if not html:
+        return ""
+    t = re.sub(r"<[^>]+>", " ", html)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def _extract_core_subject(title):
+    """Extract a clean editorial noun phrase from any article title style.
+
+    Handles four title shapes, in order:
+      1. Already-wrapped editorial  "Why X Matters for Y"  → "X"
+      2. Infinitive press release   "Vendor to Showcase X at NAB"  → "Vendor's X"
+      3. Finite launch verb         "Vendor Launches Product"  → "Vendor's Product"
+      4. Colon-split                "Vendor: Detail"  → "Vendor"
+
+    Falls back to the trimmed title when no pattern matches.
+    Subject is capped at 55 chars (word boundary) to keep headlines readable.
+    """
+    t = title.strip().rstrip(".")
+
+    # 1. Strip editorial wrappers — "Why X Matters/Signals/Means for Y"
+    m = re.match(
+        r'^(?:Why|What|How)\s+(.+?)\s+(?:[Mm]atters?|[Ss]ignals?|[Mm]eans?)\s+for\s+.+$', t
+    )
+    if m:
+        subject = m.group(1).strip()
+        return subject[:55].rsplit(" ", 1)[0] if len(subject) > 55 else subject
+
+    # "How X Is/Are/Will/Can …"
+    m = re.match(r'^How\s+(.+?)\s+(?:Is|Are|Will|Can)\s+.+$', t)
+    if m:
+        subject = m.group(1).strip()
+        return subject[:55].rsplit(" ", 1)[0] if len(subject) > 55 else subject
+
+    # 2. Infinitive: "Vendor to Showcase X at Event"
+    m = re.match(
+        r'^(.+?)\s+to\s+(?:showcase|demonstrate|present|exhibit|announce|reveal'
+        r'|unveil|launch|introduce|highlight|display)\s+(.+?)(?:\s+at\s+\w.+)?$',
+        t, re.IGNORECASE
+    )
+    if m:
+        vendor = m.group(1).strip()
+        detail = re.sub(
+            r'\s+at\s+(NAB|IBC|CES|ISE|BroadcastAsia)[\w\s]*$', '',
+            m.group(2), flags=re.IGNORECASE
+        ).strip()
+        raw = f"{vendor}\u2019s {detail}" if detail and len(detail) < 40 else vendor
+        return raw[:55].rsplit(" ", 1)[0] if len(raw) > 55 else raw
+
+    # 3. Finite launch verb: "Vendor Launches/Announces Product"
+    m = re.match(
+        r'^(.+?)\s+(?:launches?|announces?|releases?|unveils?|introduces?'
+        r'|ships?|debuts?|presents?|rolls? out)\s+(.+)$',
+        t, re.IGNORECASE
+    )
+    if m:
+        vendor = m.group(1).strip()
+        product = m.group(2).strip()
+        raw = f"{vendor}\u2019s {product}" if len(product) < 45 else vendor
+        return raw[:55].rsplit(" ", 1)[0] if len(raw) > 55 else raw
+
+    # 4. Colon split — take the left side
+    if ":" in t:
+        left = t.split(":", 1)[0].strip()
+        if left:
+            return left[:55].rsplit(" ", 1)[0] if len(left) > 55 else left
+
+    # No pattern matched — return trimmed title, capped
+    return t[:55].rsplit(" ", 1)[0] if len(t) > 55 else t
+
+
+def _streamic_headline(a):
+    """Return a varied editorial headline for The Streamic Intelligence cards.
+
+    Five rotating patterns (A–E) are selected via a deterministic, build-stable
+    integer derived from the article slug — no PYTHONHASHSEED dependency.
+    Only Pattern A begins with "Why", so at most 1 in 5 cards starts that way,
+    preventing the repetitive all-Why look.
+
+    Pattern A — Why it matters
+      "Why {subject} Matters for {team}"
+    Pattern B — What this means (two sub-variants)
+      "What {subject} Means for {context}"
+      "What {subject} Signals for {team}"
+    Pattern C — The shift / bigger picture (two sub-variants)
+      "The Workflow Shift Behind {subject}"
+      "The Bigger Picture Behind {subject}"
+    Pattern D — Inside / How (two sub-variants)
+      "Inside {subject}'s Impact on {team}"
+      "How {subject} Is Reshaping {context}"
+    Pattern E — Subject-led editorial summary
+      "{subject} and the Road to {context_noun}"
+    """
+    title = (a.get("title") or "").strip()
+    if not title:
+        return "Streamic Analysis"
+
+    cat  = (a.get("category") or "featured").lower()
+    slug = (a.get("slug") or title)
+
+    # Category → audience label, context phrase, and pre-built title-case context
+    # (title-case stored explicitly to avoid str.title() mis-capitalising "IP" etc.)
+    _TEAM_MAP = {
+        "newsroom":           "Newsroom Teams",
+        "cloud":              "Cloud Production Teams",
+        "graphics":           "Graphics and Studio Teams",
+        "playout":            "Playout and Automation Teams",
+        "infrastructure":     "Infrastructure Teams",
+        "streaming":          "Streaming and Delivery Teams",
+        "ai-post-production": "AI and Post-Production Teams",
+        "featured":           "Broadcast Operations Teams",
+    }
+    _CONTEXT_TITLE_MAP = {
+        "newsroom":           "Newsroom Workflows and Operations",
+        "cloud":              "Cloud Broadcast Infrastructure",
+        "graphics":           "Live Graphics and Studio Production",
+        "playout":            "Playout and Channel Automation",
+        "infrastructure":     "IP and Infrastructure Engineering",
+        "streaming":          "Streaming and Media Delivery",
+        "ai-post-production": "AI-Driven Post-Production",
+        "featured":           "Broadcast Media Operations",
+    }
+    _CONTEXT_NOUN_MAP = {
+        "newsroom":           "Smarter Newsroom Operations",
+        "cloud":              "Cloud-First Production",
+        "graphics":           "Live Graphics Modernisation",
+        "playout":            "Leaner Channel Automation",
+        "infrastructure":     "IP Infrastructure Convergence",
+        "streaming":          "Scalable Media Delivery",
+        "ai-post-production": "AI-Driven Post-Production",
+        "featured":           "Modern Broadcast Operations",
+    }
+
+    team          = _TEAM_MAP.get(cat, "Broadcast Operations Teams")
+    context_title = _CONTEXT_TITLE_MAP.get(cat, "Broadcast Media Operations")
+    context_noun  = _CONTEXT_NOUN_MAP.get(cat, "Modern Broadcast Operations")
+
+    subject = _extract_core_subject(title)
+
+    # Deterministic integer — stable across builds regardless of PYTHONHASHSEED
+    _n = sum(ord(c) * (i + 1) for i, c in enumerate(slug[:20]))
+
+    pattern    = _n % 5          # primary pattern selector   (0–4)
+    sub_choice = (_n // 5) % 2  # sub-variant within pattern (0–1)
+
+    if pattern == 0:
+        # A — Why it matters
+        return f"Why {subject} Matters for {team}"
+
+    elif pattern == 1:
+        # B — What this means / signals
+        if sub_choice == 0:
+            return f"What {subject} Means for {context_title}"
         else:
-            flat = []
-            for cat, lst in (raw or {}).items():
-                for it in (lst or []):
-                    if isinstance(it, dict):
-                        item = dict(it)
-                        item.setdefault('category', cat)
-                        flat.append(item)
-            feed_items = sorted(flat, key=lambda x: x.get('pubDate',''), reverse=True)
+            return f"What {subject} Signals for {team}"
+
+    elif pattern == 2:
+        # C — The shift / bigger picture
+        if sub_choice == 0:
+            return f"The Workflow Shift Behind {subject}"
+        else:
+            return f"The Bigger Picture Behind {subject}"
+
+    elif pattern == 3:
+        # D — How (two compact sub-variants; no possessive to avoid grammar edge-cases)
+        if sub_choice == 0:
+            return f"How {subject} Is Reshaping {context_title}"
+        else:
+            return f"How {subject} Changes the Picture for {team}"
+
+    else:
+        # E — Subject-led editorial summary
+        return f"{subject} and the Road to {context_noun}"
+
+
+def _streamic_preview(a):
+    """Return a concise editorial preview for The Streamic Intelligence cards.
+
+    Priority: dek > card_summary > meta_description > body_html first sentence > smart_dek.
+    Capped at 160 chars, broken at a word boundary.  Never returns an empty string.
+    """
+    MAX = 160
+
+    for field in ("dek", "card_summary", "meta_description"):
+        val = _plain_text(a.get(field) or "").strip()
+        if len(val) > 20:
+            if len(val) <= MAX:
+                return val
+            return val[:MAX].rsplit(" ", 1)[0] + "..."
+
+    body = _plain_text(a.get("body_html") or "").strip()
+    if len(body) > 40:
+        if len(body) <= MAX:
+            return body
+        return body[:MAX].rsplit(" ", 1)[0] + "..."
+
+    # Final fallback — always produces a non-empty string
+    return smart_dek(a)[:MAX]
+
+
+def load_homepage_feed(arts, limit=14):
+    """Load homepage cards directly from the editorial article corpus.
+
+    news.json removed — all content comes from generated_articles.json.
+    Returns newest articles sorted by date then body length.
+    """
+    if not arts:
+        return []
 
     mapped = []
     seen = set()
-    for item in feed_items:
-        url = item.get('link') or item.get('url') or item.get('guid')
-        title_key = (item.get('title') or '').strip().lower()
-        art = by_url.get(url) or by_title.get(title_key)
-        if not art or not art.get('slug'):
-            continue  # skip items without internal article — no external links
-        merged = dict(art)
-        merged.update({
-            'title': item.get('title') or merged.get('title',''),
-            'category': item.get('category') or merged.get('category','featured'),
-            'source_domain': item.get('source') or item.get('source_domain') or _source_name(url) or merged.get('source_domain',''),
-            'published': item.get('pubDate') or item.get('published') or merged.get('published',''),
-            'source_url': url or merged.get('source_url',''),
-            'url': url or merged.get('url',''),
-            # COPYRIGHT FIX: prefer the article's pool-normalized image_url
-            # over any legacy thumbnail. The previous order
-            # shipped copyrighted vendor PR photos into Breaking News,
-            # bypassing _fix_article_images() entirely.
-            'image_url': merged.get('image_url') or item.get('image') or '',
-            'slug': art['slug'],
-        })
-        key = merged['slug']
-        if key not in seen:
-            seen.add(key)
-            mapped.append(merged)
 
-    # Sort: newest first, then by body length (prefer longer articles)
+    for a in arts:
+        if not isinstance(a, dict):
+            continue
+        slug = (a.get("slug") or "").strip()
+        if not slug or slug in seen:
+            continue
+        mapped.append(a)
+        seen.add(slug)
+
     def _feed_sort(a):
-        body = a.get('body_html','') or ''
-        wc = len(re.sub(r'<[^>]+>',' ',body).split())
-        return (a.get('published',''), wc)
-    mapped.sort(key=_feed_sort, reverse=True)
+        body = a.get("body_html", "") or ""
+        wc = len(re.sub(r"<[^>]+>", " ", body).split())
+        return (a.get("published", ""), wc)
 
-    if not mapped:
-        mapped = sorted([a for a in arts if not a.get('is_editorial') and not a.get('editorial')], key=lambda a: a.get('published',''), reverse=True)[:limit]
+    mapped.sort(key=_feed_sort, reverse=True)
     return mapped[:limit]
 
 def _item_href(a):
@@ -964,28 +1137,45 @@ def _item_target(a):
     return ''
 
 def _hp_news_item(a):
-    slug = a.get("slug","")
+    """Render one card in The Streamic Intelligence section.
+
+    Hierarchy (analysis-first):
+      1. STREAMIC ANALYSIS label
+      2. Streamic editorial headline
+      3. Editorial preview
+      4. Date
+      5. Original source credit (secondary)
+      6. Internal CTA
+    """
+    slug         = a.get("slug", "")
     analysis_href = f"articles/{slug}.html" if slug else "#"
-    src_url = e(a.get("source_url","") or a.get("url","") or "")
-    title = e(a.get("title", ""))
-    src = e(_source_name(a.get("source_domain", a.get("source", ""))))
-    dt = d(a.get("published", ""))
-    dek = e((a.get("dek") or a.get("card_summary") or a.get("meta_description") or "")[:120])
-    # Source link — only if we have a real URL
-    src_link = ""
+    src_url      = e(a.get("source_url", "") or a.get("url", "") or "")
+    src          = e(_source_name(a.get("source_domain", a.get("source", ""))))
+    dt           = d(a.get("published", ""))
+    headline     = e(_streamic_headline(a))
+    preview      = e(_streamic_preview(a))
+
+    # Source attribution — secondary; rendered only when data is available
+    src_attr = ""
     if src_url and src:
-        src_link = f'<a href="{src_url}" target="_blank" rel="noopener noreferrer nofollow" class="hp-news-src-link">Source: {src} &#8599;</a>'
+        src_attr = (
+            f'<a href="{src_url}" target="_blank" rel="noopener noreferrer nofollow"'
+            f' class="hp-news-src-link">Original source: {src} &#8599;</a>'
+        )
+    elif src:
+        src_attr = f'<span class="hp-news-src-link">Original source: {src}</span>'
+
     return f'''<div class="hp-news-item">
-  <div class="hp-news-thumb"><img src="{_hp_img(a)}" alt="{title}" loading="lazy" onerror="this.onerror=null;this.src='assets/fallback.jpg'"></div>
+  <div class="hp-news-thumb"><img src="{_hp_img(a)}" alt="{headline}" loading="lazy" onerror="this.onerror=null;this.src=\'assets/fallback.jpg\'"></div>
   <div class="hp-news-body">
-    <span class="hp-news-src">{src}</span>
-    <a href="{analysis_href}" class="hp-news-title">{title}</a>
-    <span class="hp-news-dek">{dek}</span>
+    <span class="hp-news-src">STREAMIC ANALYSIS</span>
+    <a href="{analysis_href}" class="hp-news-title">{headline}</a>
+    <span class="hp-news-dek">{preview}</span>
     <div class="hp-news-foot">
       <time class="hp-news-date">{dt}</time>
-      <a href="{analysis_href}" class="hp-news-read">Read Streamic Analysis &#8594;</a>
+      <a href="{analysis_href}" class="hp-news-read">Read full analysis &#8594;</a>
     </div>
-    {src_link}
+    {src_attr}
   </div>
 </div>'''
 def _hp_sidebar_pick(a):
@@ -1204,7 +1394,7 @@ def featured_page(arts):
           <div class="hp-guide-grid">{guides_html}</div>
         </section>
         <section class="hp-news">
-          <div class="hp-sec-hdr"><h2>The Streamic Intelligence</h2><p class="hp-sec-sub">In-depth coverage of playout, MAM/PAM, archive, cloud production, Adobe workflows, SMPTE standards, and AI-driven media operations.</p></div>
+          <div class="hp-sec-hdr"><h2>The Streamic Intelligence</h2><p class="hp-sec-sub">Original Streamic headlines and concise editorial previews, with credited source links kept secondary to the analysis.</p></div>
           <div class="hp-news-list">{news_html}</div>
         </section>
       </div>
@@ -1218,7 +1408,7 @@ def featured_page(arts):
           {howto_html}
         </div>
         <div class="hp-sb-section">
-          <div class="hp-sb-hdr">Breaking Media Tech News</div>
+          <div class="hp-sb-hdr">Latest Media IT Updates</div>
           {sb_news_html}
         </div>
       </aside>
@@ -1261,7 +1451,6 @@ def category_page(cat, arts):
         first  = sl[:1]
         rest   = sl[1:]
 
-        hero_html = hero_block(first[0], base="") if first else ""
         if cat == "ai-post-production" and pg == 0:
             hero_html = f"""<section class="hero hero--ai-post-custom">
   <div class="hero-inner">
@@ -1283,7 +1472,11 @@ def category_page(cat, arts):
   <a class="nab-inline-card" href="articles/2026-04-17-ai-post-production-avid-google-cloud-agentic-ai-media-production.html"><span class="nab-inline-kicker">Avid</span><strong>Avid Content Core and Google Gemini</strong><span>Agentic AI, archive search, and hybrid deployment without a rip-and-replace migration.</span></a>
   <a class="nab-inline-card" href="articles/2026-04-01-newsroom-dalet-flex-2512-semantic-search-dalia-ai.html"><span class="nab-inline-kicker">Dalet</span><strong>Dalia moves from idea to operational layer</strong><span>Natural-language workflow triggers with human validation kept in the loop.</span></a>
   <a class="nab-inline-card" href="articles/2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation.html"><span class="nab-inline-kicker">Telestream</span><strong>OCI + Adobe workflow acceleration</strong><span>Premiere-to-Vantage automation, Frame.io readiness, and multi-cloud QoS monitoring.</span></a>
-</section>""" + hero_html
+</section>"""
+            rest = sl
+        else:
+            hero_html = hero_block(first[0], base="") if first else ""
+
         grid_html = news_grid(rest, grid_id="catGrid") if rest else ""
 
         pag = _pag_html(cat, pg, total_pages)
@@ -1858,43 +2051,78 @@ def terms_page():
 {footer()}
 {_cookie_banner()}
 </body></html>"""
-
 def editorial_policy_page():
-    yr = datetime.now().year
-    return f"""{head("Editorial Policy — The Streamic","How The Streamic produces, reviews, and attributes broadcast technology content.",f"{BASE_URL}/editorial-policy.html")}
+    last_updated = datetime.now(timezone.utc).strftime("%B %d, %Y")
+    return f"""{head("Editorial Policy — The Streamic","Editorial approach, coverage focus, experience, and contact information for The Streamic.",f"{BASE_URL}/editorial-policy.html")}
 <body>
-{nav()}
+{nav("editorial-policy.html")}
 <main><div class="w" style="padding:52px 24px 80px;max-width:780px">
 <h1 style="font-family:var(--serif);font-size:clamp(26px,4vw,42px);margin-bottom:16px;letter-spacing:-.5px">Editorial Policy</h1>
-<p style="font-size:13px;color:var(--ink4);margin-bottom:32px">Last updated: {yr}</p>
+<p style="font-size:13px;color:var(--ink4);margin-bottom:32px">Last updated: {last_updated}</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:0 0 12px">Our Editorial Mission</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">The Streamic is an independent broadcast and streaming technology publication. Our mission is to provide clear, practical analysis for broadcast engineers, media operations teams, and streaming professionals — not press release rewrites, and not generic AI summaries.</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:0 0 12px">About The Streamic</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">The Streamic is an independent publication focused on broadcast technology, media infrastructure, streaming workflows, newsroom systems, and post-production operations.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">The publication is built around a simple idea: most industry coverage explains what is announced — but very little explains what actually works in production. The Streamic focuses on that gap.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">We analyse how systems behave in real environments: how workflows connect, where integrations fail, how standards are implemented, and what operational teams need to consider before deployment.</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">How We Use AI Tools</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">Some articles on The Streamic are produced with the assistance of AI language models (Google Gemini and Groq/Llama). These tools are used to:</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Editorial Focus</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">The Streamic covers:</p>
 <ul style="font-size:15px;color:var(--ink3);line-height:1.9;padding-left:22px;margin-bottom:20px">
-  <li>Draft initial analysis from source-grounded industry news</li>
-  <li>Identify domain-specific technical signals and implications</li>
-  <li>Structure content into our editorial framework (domain extraction, technology intelligence, engineering takeaways)</li>
+  <li>Broadcast infrastructure and IP workflows (including SMPTE ST 2110 environments)</li>
+  <li>Streaming and OTT delivery systems (HLS, DASH, CDN workflows)</li>
+  <li>Post-production pipelines (NLE interoperability, conform, grading, delivery)</li>
+  <li>Media asset management (MAM/PAM) and archive strategies</li>
+  <li>Cloud and hybrid production workflows</li>
+  <li>Newsroom systems and editorial operations</li>
+  <li>Monitoring, automation, and operational reliability</li>
 </ul>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">AI-generated drafts are reviewed against our quality standards. Articles that pass a minimum word count, structural depth, and domain terminology threshold are published. Those that do not are regenerated or withheld.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">Coverage is technical, vendor-aware, and grounded in real-world implementation rather than marketing narratives.</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Human Review Process</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">All published editorial content is reviewed by Prerak K Mehta, Founder and Editor-in-Chief, or a designated editorial team member. Review covers factual accuracy relative to the source material, domain relevance, and tone. Articles found to contain generic or misleading content are not published.</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Experience Behind The Publication</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">The Streamic is founded and operated by a broadcast and media systems professional based in Dublin, Ireland.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">The editorial direction is informed by:</p>
+<ul style="font-size:15px;color:var(--ink3);line-height:1.9;padding-left:22px;margin-bottom:20px">
+  <li>20+ years of experience in broadcast and media technology environments in India, across installation, maintenance, and troubleshooting of production and post-production systems</li>
+  <li>4+ years working within broadcast operations in Dublin, supporting modern media workflows in live and production environments</li>
+  <li>Hands-on exposure to newsroom systems, playout infrastructure, post-production pipelines, and evolving IP-based media systems</li>
+</ul>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">This background shapes the editorial approach — practical, systems-focused, and aligned with how technology behaves under real operational pressure.</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Source Attribution</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">Industry news briefings always credit and link to their original source. We do not reproduce original articles verbatim. All external links to source material carry <code>rel="nofollow noopener"</code>. Source-grounded briefs are differentiated from original long-form editorial analysis.</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">How We Work</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">The Streamic is not a press-release publication.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">Each article is written as independent editorial analysis based on:</p>
+<ul style="font-size:15px;color:var(--ink3);line-height:1.9;padding-left:22px;margin-bottom:20px">
+  <li>publicly available technical information</li>
+  <li>industry announcements and documentation</li>
+  <li>observed workflow patterns across broadcast and post-production environments</li>
+</ul>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">The goal is to extract operational insight, not repeat vendor messaging.</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">Where information is incomplete or evolving, that uncertainty is acknowledged rather than assumed.</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Corrections Policy</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">We correct factual errors promptly. If you identify an error, please contact us at <a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a> with the article URL and the specific correction. Significant corrections are noted inline on the article.</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Editorial Independence</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">The Streamic operates independently.</p>
+<ul style="font-size:15px;color:var(--ink3);line-height:1.9;padding-left:22px;margin-bottom:20px">
+  <li>We do not accept paid editorial coverage</li>
+  <li>Vendor mentions are based on relevance, not commercial relationships</li>
+  <li>Advertising, where present, does not influence editorial decisions</li>
+</ul>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Independence &amp; Advertising</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">The Streamic is independently owned. Advertising (served via Google AdSense) does not influence editorial decisions. We do not accept sponsored articles or paid coverage. Vendor mentions reflect genuine editorial relevance, not commercial arrangements.</p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Who This Is For</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:14px">The Streamic is written for:</p>
+<ul style="font-size:15px;color:var(--ink3);line-height:1.9;padding-left:22px;margin-bottom:20px">
+  <li>Broadcast engineers and system integrators</li>
+  <li>Post-production supervisors and technical operators</li>
+  <li>Media IT and infrastructure teams</li>
+  <li>Technology decision-makers in broadcast and streaming environments</li>
+</ul>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">If your work involves keeping media systems running reliably under real constraints, this publication is built for you.</p>
 
-<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Contact the Editor</h2>
-<p style="font-size:15px;color:var(--ink3);line-height:1.75">Editorial enquiries, corrections, and feedback: <a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a> &nbsp;|&nbsp; <a href="contact.html" style="color:var(--blue)">Use our contact form &rarr;</a></p>
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Location</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:20px">Dublin, Ireland</p>
 
+<h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Contact</h2>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">For editorial enquiries, feedback, or corrections:</p>
+<p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px"><a href="mailto:technodate3@gmail.com" style="color:var(--blue)">technodate3@gmail.com</a> or use the <a href="contact.html" style="color:var(--blue)">contact form</a> on this site.</p>
 </div></main>
 {footer()}
 {_cookie_banner()}
@@ -2013,7 +2241,55 @@ def post_production_workflows_page():
   <li><strong>Cloud &amp; hybrid post</strong> &#8212; Frame.io, EditShare Cloud, Blackmagic Cloud, Avid Edit On Demand, and the bandwidth / latency / security trade-offs of each. Real-world remote editing vs. marketing-reel remote editing.</li>
   <li><strong>Archive &amp; restore</strong> &#8212; LTO strategies, object-storage archive tiers, cold-retrieval SLAs, and the dark art of conforming an archived project 18 months later when the original NLE has moved on three versions.</li>
 </ul>
+<h2 style="font-family:var(--serif);font-size:22px;margin:36px 0 14px">Workflow Deep Dives</h2>
 
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:28px">
+
+  <a href="articles/studio-grade-video-workflow-post-production-2026.html"
+     style="position:relative;display:block;overflow:hidden;border-radius:20px;min-height:200px;background:#111;text-decoration:none;color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.12)">
+
+    <img src="assets/images/post_production/post-production-workflow.jpg"
+         alt="Studio Grade Video Workflow"
+         loading="lazy"
+         onerror="this.onerror=null;this.src='assets/fallback.jpg'"
+         style="width:100%;height:100%;object-fit:cover;opacity:.9">
+
+    <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.2))"></div>
+
+    <div style="position:absolute;bottom:0;padding:18px">
+      <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8">Post Production</span>
+      <h3 style="margin:6px 0 6px;font-family:var(--serif);font-size:20px;line-height:1.25">
+        Studio Grade Video Workflow 2026
+      </h3>
+      <p style="font-size:13px;opacity:.85;line-height:1.5;margin:0">
+        End-to-end post workflow from ingest to delivery, covering proxy, conform, grading, and final packaging.
+      </p>
+    </div>
+  </a>
+
+  <a href="articles/2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow.html"
+     style="position:relative;display:block;overflow:hidden;border-radius:20px;min-height:200px;background:#111;text-decoration:none;color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.12)">
+
+    <img src="assets/images/post_production/cloud-review-workflow.jpg"
+         alt="Frame.io Workfront Review Workflow"
+         loading="lazy"
+         onerror="this.onerror=null;this.src='assets/fallback.jpg'"
+         style="width:100%;height:100%;object-fit:cover;opacity:.9">
+
+    <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.2))"></div>
+
+    <div style="position:absolute;bottom:0;padding:18px">
+      <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8">Cloud Collaboration</span>
+      <h3 style="margin:6px 0 6px;font-family:var(--serif);font-size:20px;line-height:1.25">
+        Frame.io + Workfront Review Workflow
+      </h3>
+      <p style="font-size:13px;opacity:.85;line-height:1.5;margin:0">
+        How AI-assisted review and approval workflows connect creative teams, stakeholders, and delivery pipelines.
+      </p>
+    </div>
+  </a>
+
+</div>
 <h2 style="font-family:var(--serif);font-size:22px;margin:32px 0 12px">Our approach</h2>
 <p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">Post-production technology is drowning in marketing. Every NLE claims seamless interchange, every MAM claims universal metadata, every cloud-collaboration platform claims security-first architecture. Our job is to separate what actually ships from what is still a product roadmap, and to call out the integration gotchas that only surface at 02:00 on a delivery night.</p>
 <p style="font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:16px">Every Streamic article in this area is grounded in real workflow analysis, not vendor-supplied slideware. Where a vendor claims compatibility, we verify by checking against shipping documentation, public API specs, and &#8212; where possible &#8212; the experience of engineering teams running it in production. Where compatibility is partial or conditional, we say so.</p>
@@ -2699,6 +2975,96 @@ def sitemap(arts):
     return "\n".join(lines)
 
 # ── MAIN
+def load_manual_articles():
+    """Return list of article dicts from data/manual_articles.json.
+
+    Manual articles override generated_articles.json on slug collision.
+    Image resolution priority:
+      1. entry["image"] if file exists on disk under docs/
+      2. /assets/fallback.jpg
+    Each returned dict carries _source="manual" for build-log reporting.
+    """
+    if not os.path.isfile(MANUAL_F):
+        return []
+
+    try:
+        with open(MANUAL_F, "r", encoding="utf-8") as _f:
+            raw = json.load(_f)
+    except Exception as exc:
+        print(f"  ⚠ Could not read manual_articles.json: {exc}")
+        return []
+
+    results = []
+    skipped = 0
+
+    for entry in raw:
+        slug = (entry.get("slug") or "").strip()
+        if not slug:
+            print("  ⚠ manual_articles.json: entry missing slug — skipped")
+            skipped += 1
+            continue
+
+        if entry.get("status") != "published":
+            skipped += 1
+            continue
+
+        html_path = os.path.join(ARTS_D, f"{slug}.html")
+        if not os.path.isfile(html_path):
+            print(f"  ⚠ manual '{slug}': docs/articles/{slug}.html not found — skipped")
+            skipped += 1
+            continue
+
+        title    = (entry.get("title") or "").strip()
+        date     = (entry.get("date") or "2026-01-01")[:10]
+        category = (entry.get("category") or "ai-post-production").strip()
+        desc     = (entry.get("description") or "").strip()
+
+        # Image resolution: file on disk, or /assets/fallback.jpg
+        raw_img = (entry.get("image") or "").strip()
+        if raw_img and not raw_img.startswith("/"):
+            raw_img = "/" + raw_img
+        img = ""
+        if raw_img:
+            img_disk = os.path.join(DOCS, raw_img.lstrip("/"))
+            if os.path.isfile(img_disk):
+                img = raw_img
+            else:
+                print(f"  ⚠ manual '{slug}': image {raw_img!r} not found on disk — using fallback")
+        if not img:
+            img = "/assets/fallback.jpg"
+
+        results.append({
+            "slug":              slug,
+            "title":             title,
+            "published":         date,
+            "category":          category,
+            "dek":               desc,
+            "meta_description":  desc,
+            "card_summary":      desc,
+            "image_url":         img,
+            "image_credit":      "The Streamic",
+            "image_license":     "Site Asset",
+            "image_license_url": "",
+            "word_count":        900,
+            "generated_by":      "gpt_manual_editorial",
+            "is_editorial":      True,
+            "editorial":         True,
+            "source_url":        "",
+            "source_domain":     "The Streamic",
+            "quality_score":     90,
+            "body_html":         f"<p>{desc}</p>" if desc else "",
+            "_source":           "manual",
+        })
+
+    if results:
+        print(f"  ✓ manual_articles.json: {len(results)} loaded"
+              f"{f', {skipped} skipped' if skipped else ''}")
+    elif skipped:
+        print(f"  ℹ manual_articles.json: 0 loaded, {skipped} skipped")
+
+    return results
+
+
 def main():
     with open(ARTS_F,"r",encoding="utf-8") as f: arts = json.load(f)
     if not arts: raise SystemExit("No articles")
@@ -2796,6 +3162,21 @@ def main():
     arts = kept
     print(f"  After near-dup dedup: {len(arts)} unique articles "
           f"(removed {dropped_near_dup} near-duplicates)")
+
+    # ── Merge manual_articles.json (overrides generated on slug collision) ──
+    generated_arts = arts
+    manual_arts    = load_manual_articles()
+    by_slug = {}
+    for a in generated_arts:
+        by_slug[a.get("slug", "")] = a
+    for a in manual_arts:
+        by_slug[a.get("slug", "")] = a   # manual overrides generated
+    arts = sorted(by_slug.values(), key=lambda a: a.get("published", ""), reverse=True)
+    if manual_arts:
+        m_slugs = {a.get("slug") for a in manual_arts}
+        manual_count    = sum(1 for a in arts if a.get("slug") in m_slugs)
+        generated_count = len(arts) - manual_count
+        print(f"  Merged: {manual_count} manual + {generated_count} generated = {len(arts)} total")
 
     # ── Ensure all articles have a slug ──────────────────────────────────
     def _slugify(title):
