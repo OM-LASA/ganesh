@@ -5,7 +5,7 @@
     "date": "2026-04-24",
     "category": "ai-post-production",
     "section": "latest-insights",
-    "description": "Dynamic Media Facilities (DMF) explained \u2014 what it is, how it works, and why it became a key topic at NAB Show 2026 for modern broadcast infrastructure.",
+    "description": "Dynamic Media Facilities (DMF) explained — what it is, how it works, and why it became a key topic at NAB Show 2026 for modern broadcast infrastructure.",
     "image": "/assets/articles/dmf-traditional-vs-dynamic-facility.png",
     "featured": true,
     "status": "published"
@@ -62,116 +62,6 @@
     "section": "latest-insights",
     "description": "A practical 2026 studio-grade OTT post-production workflow covering ingest, proxy creation, Avid NEXIS, audio conform, color finishing, QC, and OTT delivery.",
     "image": "/assets/studio-grade-ott-workflow-2026.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-premiere-to-avid",
-    "title": "Premiere Pro to Avid Media Composer: AAF, EDL & Direct Link Handoff",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Moving a cut from Premiere Pro to Avid Media Composer without losing audio mapping, timecode, or effect metadata. A practical handoff guide.",
-    "image": "/assets/media-composer-edit.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-vantage-nas-transcode",
-    "title": "Telestream Vantage: Build a Hot Folder Workflow to MP4 on NAS",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Build a robust Vantage hot-folder workflow that transcodes any input format to broadcast-ready H.264 MP4 on a local NAS share.",
-    "image": "/assets/the-streamic-studio-2.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-vantage-aws-transcode",
-    "title": "Telestream Vantage: Deliver MP4 Output Directly to Amazon S3",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Extend your Vantage workflow to deliver MP4 output directly to Amazon S3. IAM setup, bucket policies, and parallel NAS + S3 delivery.",
-    "image": "/assets/satellite-image-1.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-avid-strawberry",
-    "title": "Strawberry PAM + Avid Media Composer: Collaborative Editing Setup",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Configure Production Flow Strawberry for collaborative Avid Media Composer editing: shared storage, hot-folder ingest, version control, and automated delivery.",
-    "image": "/assets/avid-setup-audio.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-audio-conform-avid-protools",
-    "title": "Audio Conform: Avid Media Composer to Pro Tools and Back",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Export AAF from Avid, open in Pro Tools for audio finishing, and return the mix in sync. Covers sample rates, BWF export, timecode alignment.",
-    "image": "/assets/audio-console.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-avid-media-central-health-check",
-    "title": "Avid MediaCentral Health Check: Services, Connections, and Logs",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Run a full pre-air health check \u2014 verify MCPS services, Interplay and iNEWS connections, licensing, and system logs before going on air.",
-    "image": "/assets/pcr-room.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-media-central-cache",
-    "title": "Clearing Cache in Avid MediaCentral Cloud UX",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Fix slow loads, stale thumbnails, and playback errors by clearing browser, application, and server-side proxy cache in MediaCentral Cloud UX.",
-    "image": "/assets/the-streamic-studio-1.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-vizrt-avid-integration",
-    "title": "Integrating Vizrt Graphics with Avid MediaCentral and iNEWS",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Configure the Vizrt Plugin for MediaCentral and the MOS Gateway to connect Viz Engine templates to iNEWS stories for story-driven graphics playout.",
-    "image": "/assets/newsroom-anchor.png",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-windows11-upgrade",
-    "title": "Upgrading Broadcast Workstations to Windows 11",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Pre-upgrade compatibility checks, driver verification, and rollback procedure for upgrading post and broadcast IT workstations to Windows 11.",
-    "image": "/assets/high-end-server-room.jpeg",
-    "featured": false,
-    "status": "published"
-  },
-  {
-    "slug": "guide-macos-upgrade",
-    "title": "Upgrading a Post-Production Mac to macOS Sequoia",
-    "date": "2026-01-15",
-    "category": "ai-post-production",
-    "section": "latest-insights",
-    "description": "Pre-upgrade checklist, NLE compatibility matrix, and what to do if your plugins break after upgrading to macOS Sequoia.",
-    "image": "/assets/the-streamic-studio-3.png",
     "featured": false,
     "status": "published"
   }
