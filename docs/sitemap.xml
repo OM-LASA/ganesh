@@ -13,12 +13,17 @@
   <url><loc>https://www.thestreamic.in/privacy.html</loc><lastmod>2026-04-25</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://www.thestreamic.in/terms.html</loc><lastmod>2026-04-25</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://www.thestreamic.in/articles/dynamic-media-facilities-dmf-broadcast-infrastructure-2026.html</loc><lastmod>2026-04-24</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/deepdive-aws-google-cloud-agentic-ai-nab-2026.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/deepdive-pebble-harmonic-playout-war-nab-2026.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/nab-2026-hybrid-technology-year.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-17-ai-post-production-blackmagic-davinci-resolve-21-nab.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-17-infrastructure-haivision-falkon-x4-5g-live-sports.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-17-newsroom-nab-2026-preview-broadcast-technology.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-17-infrastructure-haivision-makito-one-multi-codec-nab-2026.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-17-ai-post-production-avid-google-cloud-agentic-ai-media-production.html</loc><lastmod>2026-04-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-10-newsroom-bitcentral-to-showcase-connected-media-workfl.html</loc><lastmod>2026-04-10</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/studio-grade-video-workflow-post-production-2026.html</loc><lastmod>2026-04-03</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/Expertinsight1.html</loc><lastmod>2026-04-02</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-01-ai-post-production-telestream-adobe-frameio-creative-delivery-automation.html</loc><lastmod>2026-04-01</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-01-ai-post-production-frameio-workfront-review-approval-workflow.html</loc><lastmod>2026-04-01</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/2026-04-01-newsroom-vizrt-viz-one-ai-metadata-archive-strategy.html</loc><lastmod>2026-04-01</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
@@ -44,4 +49,14 @@
   <url><loc>https://www.thestreamic.in/articles/st-2110-small-market-hybrid-ip-broadcasters-2026.html</loc><lastmod>2026-03-19</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/c2pa-deepfake-news-credibility-digital-provenance-2026.html</loc><lastmod>2026-03-17</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.thestreamic.in/articles/green-broadcast-cloud-carbon-footprint-sustainability-2026.html</loc><lastmod>2026-03-16</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-premiere-to-avid.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-vantage-nas-transcode.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-vantage-aws-transcode.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-avid-strawberry.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-audio-conform-avid-protools.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-avid-media-central-health-check.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-media-central-cache.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-vizrt-avid-integration.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-windows11-upgrade.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.thestreamic.in/articles/guide-macos-upgrade.html</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
 </urlset>
