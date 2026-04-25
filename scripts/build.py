@@ -658,158 +658,203 @@ def is_high_value(article: dict) -> bool:
     # Any article with a title passes (never blank)
     return bool(article.get("title", "").strip())
 
+# ── LOCAL IMAGE SYSTEM ───────────────────────────────────────────────────────
+# ALL images served from docs/assets/ — no Unsplash, no external URLs.
+# assign_images.py populates image fields. build.py resolves from local disk.
 
-# ── STRICT LOCAL IMAGE SYSTEM ────────────────────────────────────────────────
-# IMPORTANT: The Streamic should not use online image fallback.
-# All article/card images must resolve to files committed under docs/assets/.
-
-_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
-_BROKEN_IMAGE_PATHS = {
-    "/assets/images/_fallback/streamic-default.jpg",
-    "assets/images/_fallback/streamic-default.jpg",
-    "/assets/_fallback/streamic-default.jpg",
-    "assets/_fallback/streamic-default.jpg",
-}
-_RESERVED_ASSET_NAMES = {
-    "logo.png",
-    "fallback.jpg",
-    "favicon.png",
-    "favicon.ico",
-    "apple-touch-icon.png",
-    "nab_show_banner_news_headline_hero.png",
-    "nab-show-banner-news-headline-hero.png",
-    "gfx-hero-nab-floor.png",
-    "gfx-hero-nab-floor.jpg",
+_RESERVED_ASSETS = {
+    "logo.png", "fallback.jpg",
+    "gfx-hero-nab-floor.png", "gfx-hero-nab-floor.jpg",
     "hero-broadcast-male.png",
-    "hero-broadcast-male1png",
+    "nab-show-banner-news-headline-hero.png",
     "insight-quic-infographic.jpg",
     "neil-sadwelkar.jpg",
     "studio-grade-ott-workflow-2026.png",
 }
 
-def _asset_rel_from_url(path: str) -> str:
-    """Return docs-relative asset path like 'assets/name.jpg', or ''."""
-    if not path or not isinstance(path, str):
-        return ""
-    p = path.strip().split("?", 1)[0].split("#", 1)[0]
-    if p.startswith(("http://", "https://", "//")):
-        return ""
-    if p.startswith("/"):
-        p = p[1:]
-    if not p.startswith("assets/"):
-        return ""
-    return p
+# Category → preferred local image (meaningful editorial match)
+_CAT_IMAGE = {
+    "ai-post-production":        "media-composer-edit.png",
+    "infrastructure":             "cables.png",
+    "newsroom":                   "newsroom-anchor.png",
+    "cloud":                      "ms-server-data-center.png",
+    "playout":                    "pcr-room.png",
+    "graphics":                   "studio-image-4.png",
+    "streaming":                  "the-streamic-studio-2.png",
+    "featured":                   "the-streamic-studio-1.png",
+    "post-production-workflows":  "avid-setup-audio.png",
+    "insights":                   "production-room-of-news.png",
+    "editorsdesk":                "abstracts.png",
+}
 
-def _asset_url_exists(path: str) -> bool:
-    """True only for local /assets/... paths that exist under docs/."""
-    rel = _asset_rel_from_url(path)
-    return bool(rel and os.path.isfile(os.path.join(DOCS, rel)))
 
-def _normalise_asset_url(path: str) -> str:
-    """Convert an existing local asset path to canonical '/assets/...' form."""
-    rel = _asset_rel_from_url(path)
-    return f"/{rel}" if rel else ""
+def _local_image_exists(url: str) -> bool:
+    """True if a /assets/... path resolves to a real file under docs/."""
+    if not url:
+        return False
+    rel = url.lstrip("/")
+    return os.path.isfile(os.path.join(DOCS, rel))
 
-def _discover_local_article_images():
-    """Find usable editorial images committed anywhere under docs/assets/.
 
-    Excludes logos, fallback images, and known manually reserved hero/assets.
-    Returns canonical URLs such as '/assets/post-production-workflow.jpg'.
-    """
-    assets_root = os.path.join(DOCS, "assets")
+def _scan_local_images() -> list:
+    """Return sorted list of /assets/filename.ext for every usable image in docs/assets/.
+    Called once at build time — reflects what is actually on disk."""
     found = []
-    if not os.path.isdir(assets_root):
-        return found
-
-    for root_dir, _, files in os.walk(assets_root):
-        for fname in sorted(files):
-            low = fname.lower()
-            if not low.endswith(_IMAGE_EXTS):
+    try:
+        for fn in sorted(os.listdir(os.path.join(DOCS, "assets"))):
+            if not fn.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
                 continue
-            if low in _RESERVED_ASSET_NAMES:
+            if fn in _RESERVED_ASSETS:
                 continue
-            disk_path = os.path.join(root_dir, fname)
-            rel = os.path.relpath(disk_path, DOCS).replace(os.sep, "/")
-            if rel in {"assets/fallback.jpg", "assets/logo.png"}:
-                continue
-            found.append(f"/{rel}")
+            found.append(f"/assets/{fn}")
+    except Exception:
+        pass
+    return found if found else ["/assets/fallback.jpg"]
 
-    # Stable order keeps builds deterministic.
-    return sorted(dict.fromkeys(found))
 
-def _stable_pick_local_image(article: dict, local_images: list) -> str:
-    """Deterministically pick one local image for an article."""
-    if not local_images:
-        return "/assets/fallback.jpg"
-    key = (article.get("slug") or article.get("title") or "").strip()
-    if not key:
-        key = json.dumps(article, sort_keys=True, ensure_ascii=False)[:200]
-    idx = sum((i + 1) * ord(ch) for i, ch in enumerate(key)) % len(local_images)
-    return local_images[idx]
+def _best_local_image_for(a: dict, pool: list, used: set) -> str:
+    """Pick the best unused local image for an article.
+    Priority: category-default → round-robin from pool → fallback.jpg"""
+    cat = (a.get("category") or "featured").lower()
+    # Try category-preferred image
+    pref = _CAT_IMAGE.get(cat)
+    if pref:
+        pref_url = f"/assets/{pref}"
+        if _local_image_exists(pref_url) and pref_url not in used:
+            used.add(pref_url)
+            return pref_url
+    # Round-robin through pool
+    for img in pool:
+        if img not in used:
+            used.add(img)
+            return img
+    # Pool exhausted — reset used set and start again
+    used.clear()
+    if pool:
+        used.add(pool[0])
+        return pool[0]
+    return "/assets/fallback.jpg"
+
+
+# Backward-compat stubs (referenced by legacy code paths, safe to keep)
+def _unsplash_url(photo_id):
+    return "/assets/fallback.jpg"
+
+def _is_bad_image(url):
+    if not url:
+        return True
+    return url.startswith("http://") or url.startswith("https://")
+
+def _image_is_from_pool(url: str) -> bool:
+    return False   # Unsplash pool is retired
 
 def _fix_article_images(arts):
-    """Resolve final image_url for every article using STRICT LOCAL priority.
+    """Resolve final image_url for every article — LOCAL IMAGES ONLY.
 
-    Priority:
-      1. Existing image_url if it is a real file under docs/assets/.
-      2. Existing image field if it is a real file under docs/assets/.
-      3. Deterministic local image from the committed docs/assets/ pool.
-      4. /assets/fallback.jpg only if no editorial images exist.
+    No Unsplash. No external URLs. Every card shows a file from docs/assets/.
 
-    This deliberately removes all online image assignment.
+    Priority per article:
+      1. Manual article (_source=="manual"): image_url already confirmed on
+         disk by load_manual_articles(). Preserve as-is, set credits.
+      2. Generated article: existing image_url if it is a local /assets/ path
+         that exists on disk AND is not the broken _fallback stub.
+      3. Generated article: "image" field if it is a local /assets/ path that
+         exists on disk AND is not the broken _fallback stub.
+      4. Assign from local pool: category-preferred image, then round-robin
+         through all available docs/assets/ images.
+      5. Hard fallback: /assets/fallback.jpg (always present).
+
+    Result: every article.image_url is guaranteed to be a local /assets/ path.
     """
-    local_images = _discover_local_article_images()
-    assigned = fixed_missing = blocked_online = 0
+    BROKEN = "/assets/images/_fallback/streamic-default.jpg"
+
+    # Scan disk once — reflects exactly what's uploaded to the repo
+    pool = _scan_local_images()
+    used: set = set()
+
+    local_assigned = 0
+    fallback_used  = 0
 
     for a in arts:
-        if not isinstance(a, dict):
+        # ── PRIORITY 1: manual article — already resolved ──────────────
+        if a.get("_source") == "manual":
+            a.setdefault("image_credit",     "The Streamic")
+            a.setdefault("image_license",    "Site Asset")
+            a.setdefault("image_license_url","")
+            img = a.get("image_url", "")
+            if img and img != "/assets/fallback.jpg":
+                used.add(img)
             continue
 
+        # ── PRIORITY 2: existing image_url if valid local file ─────────
         img_url = (a.get("image_url") or "").strip()
+        if (img_url
+                and img_url != BROKEN
+                and not img_url.startswith("http")
+                and (img_url.startswith("/assets/") or img_url.startswith("assets/"))
+                and _local_image_exists(img_url)):
+            a["image_url"]         = "/" + img_url.lstrip("/")
+            a["image_credit"]      = a.get("image_credit") or "The Streamic"
+            a["image_license"]     = a.get("image_license") or "Site Asset"
+            a["image_license_url"] = a.get("image_license_url") or ""
+            used.add(a["image_url"])
+            continue
+
+        # ── PRIORITY 3: "image" field if valid local file ──────────────
         img_field = (a.get("image") or "").strip()
+        if (img_field
+                and img_field != BROKEN
+                and not img_field.startswith("http")
+                and (img_field.startswith("/assets/") or img_field.startswith("assets/"))
+                and _local_image_exists(img_field)):
+            a["image_url"]         = "/" + img_field.lstrip("/")
+            a["image_credit"]      = "The Streamic"
+            a["image_license"]     = "Site Asset"
+            a["image_license_url"] = ""
+            used.add(a["image_url"])
+            continue
 
-        chosen = ""
+        # ── PRIORITY 4: assign from local pool ────────────────────────
+        if pool:
+            chosen = _best_local_image_for(a, pool, used)
+            a["image_url"]         = chosen
+            a["image_credit"]      = "The Streamic"
+            a["image_license"]     = "Site Asset"
+            a["image_license_url"] = ""
+            local_assigned += 1
+            continue
 
-        # 1. Keep valid committed local image_url.
-        if img_url and img_url not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img_url):
-            chosen = _normalise_asset_url(img_url)
-
-        # 2. Else try valid committed local image field.
-        elif img_field and img_field not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img_field):
-            chosen = _normalise_asset_url(img_field)
-            fixed_missing += 1
-
-        # 3. Online/broken/missing image detected — assign from local deck.
-        else:
-            if img_url.startswith(("http://", "https://", "//")) or img_field.startswith(("http://", "https://", "//")):
-                blocked_online += 1
-            chosen = _stable_pick_local_image(a, local_images)
-            assigned += 1
-
-        a["image_url"] = chosen
-        a["image"] = chosen
-        a["image_credit"] = "The Streamic"
-        a["image_license"] = "Site Asset"
+        # ── PRIORITY 5: hard fallback ──────────────────────────────────
+        a["image_url"]         = "/assets/fallback.jpg"
+        a["image_credit"]      = "The Streamic"
+        a["image_license"]     = "Site Asset"
         a["image_license_url"] = ""
+        fallback_used += 1
 
-        if not a.get("image_alt"):
-            pretty = os.path.splitext(os.path.basename(chosen))[0].replace("-", " ").replace("_", " ").title()
-            a["image_alt"] = f"The Streamic editorial image: {pretty}"
+    if local_assigned:
+        print(f"  Image fixer: {local_assigned} articles assigned local images from pool")
+    if fallback_used:
+        print(f"  Image fixer: {fallback_used} articles using fallback.jpg (pool empty)")
+    # Confirm: no external URLs remain
+    ext = [a.get("image_url","") for a in arts if (a.get("image_url","") or "").startswith("http")]
+    if ext:
+        print(f"  ⚠ WARNING: {len(ext)} articles still have external image_url — check data")
 
-    print(
-        f"  Local image fixer: {len(local_images)} usable assets, "
-        f"{assigned} assigned, {fixed_missing} recovered from image field, "
-        f"{blocked_online} online images blocked"
-    )
 
 def _hp_img(a, base=""):
-    """Homepage/category helper: return only local images under docs/assets/."""
-    for key in ("image_url", "image"):
-        img = (a.get(key) or "").strip()
-        if img and img not in _BROKEN_IMAGE_PATHS and _asset_url_exists(img):
-            return eu(_normalise_asset_url(img))
-    return eu("/assets/fallback.jpg")
-
+    img = (a.get("image_url", "") or a.get("image", "") or "").strip()
+    # Only use confirmed local /assets/ paths — never external URLs
+    if img and not img.startswith("http") and (img.startswith("/assets/") or img.startswith("assets/")):
+        if _local_image_exists(img):
+            return img.lstrip("/") if base else img
+    # Per-category local fallback
+    cat = (a.get("category") or "featured").lower()
+    pref = _CAT_IMAGE.get(cat, "the-streamic-studio-1.png")
+    pref_url = f"/assets/{pref}"
+    if _local_image_exists(pref_url):
+        return pref_url
+    # Ultimate fallback
+    return "/assets/fallback.jpg"
 
 def _hp_tag(a):
     cinfo = CAT.get(a.get("category", "featured"), CAT["featured"])
@@ -1753,8 +1798,8 @@ def article_page(a):
     cinfo_lbl   = cinfo.get('label','')
     cinfo_icon2 = cinfo.get('icon','')
     cinfo_page  = CAT_PAGE.get(cat, cat+'.html')
-    lic_url   = e(a.get('image_license_url',''))
-    lic_label = e(a.get('image_license','Site Asset'))
+    lic_url   = e(a.get('image_license_url','https://unsplash.com/license'))
+    lic_label = e(a.get('image_license','Unsplash License'))
     if not is_ed and src_url:
         title_html = f'<h1><a href="{e(src_url)}" target="_blank" rel="noopener noreferrer nofollow" style="color:inherit;text-decoration:none;">{e(title)}</a></h1>'
     else:
@@ -1782,7 +1827,7 @@ def article_page(a):
     </div>
     <figure>
       <img src="{eu(img)}" alt="{e(title)}" loading="eager">
-      <figcaption>{e(a.get("image_credit","The Streamic"))} &#8212; {lic_label}</figcaption>
+      <figcaption>{e(a.get("image_credit","Photo via Unsplash &#8212; free to use under the Unsplash License"))} &#8212; <a href="{lic_url}" rel="nofollow noopener" target="_blank" style="color:var(--ink4)">{lic_label}</a></figcaption>
     </figure>
     <div class="art-body">{source_banner}{body}{editors_note}</div>
     {source_credit}
