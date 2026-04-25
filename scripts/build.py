@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 ROOT      = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ARTS_F    = os.path.join(ROOT, "data", "generated_articles.json")
+MANUAL_F  = os.path.join(ROOT, "data", "manual_articles.json")
 DOCS      = os.path.join(ROOT, "docs")
 ARTS_D    = os.path.join(DOCS, "articles")
 BASE_URL  = os.environ.get("SITE_BASE_URL", "https://www.thestreamic.in").rstrip("/")
@@ -2963,6 +2964,108 @@ def sitemap(arts):
     return "\n".join(lines)
 
 # ── MAIN
+# ── MANUAL ARTICLES LOADER ───────────────────────────────────────────────────
+# Reads data/manual_articles.json and converts each published entry into an
+# article dict that is fully compatible with the existing build.py pipeline.
+# Rules:
+#   - Only entries with status == "published" are loaded.
+#   - docs/articles/{slug}.html must exist or the entry is skipped (warning printed).
+#   - If the HTML starts with <!-- HAND_AUTHORED --> it is NEVER overwritten.
+#   - image_url is set from "image" field. Must start with /assets/ or assets/
+#     so _fix_article_images() preserves it. Falls back to /assets/fallback.jpg.
+#   - Slugs already present in generated_articles.json are skipped (no duplicates).
+
+def load_manual_articles(existing_slugs):
+    """Return list of article dicts from data/manual_articles.json.
+
+    existing_slugs: set of slugs already loaded from generated_articles.json.
+    """
+    if not os.path.isfile(MANUAL_F):
+        # Nothing to load — not an error.
+        return []
+
+    try:
+        with open(MANUAL_F, "r", encoding="utf-8") as _f:
+            raw = json.load(_f)
+    except Exception as exc:
+        print(f"  ⚠ Could not read manual_articles.json: {exc}")
+        return []
+
+    results = []
+    skipped = 0
+
+    for entry in raw:
+        slug = (entry.get("slug") or "").strip()
+        if not slug:
+            print("  ⚠ manual_articles.json: entry missing slug — skipped")
+            skipped += 1
+            continue
+
+        # Only published entries
+        if entry.get("status") != "published":
+            skipped += 1
+            continue
+
+        # Skip if already in generated_articles.json
+        if slug in existing_slugs:
+            skipped += 1
+            continue
+
+        # Article HTML must exist
+        html_path = os.path.join(ARTS_D, f"{slug}.html")
+        if not os.path.isfile(html_path):
+            print(f"  ⚠ manual article '{slug}': docs/articles/{slug}.html not found — skipped")
+            skipped += 1
+            continue
+
+        title    = (entry.get("title") or "").strip()
+        date     = (entry.get("date") or "2026-01-01")[:10]
+        category = (entry.get("category") or "ai-post-production").strip()
+        desc     = (entry.get("description") or "").strip()
+
+        # Image: must be a local /assets/ path so _fix_article_images preserves it.
+        img = (entry.get("image") or "").strip()
+        if img and not img.startswith("/"):
+            img = "/" + img          # ensure leading slash
+        # Verify the file actually exists under docs/
+        if img:
+            img_disk = os.path.join(DOCS, img.lstrip("/"))
+            if not os.path.isfile(img_disk):
+                img = ""             # file missing — fall through to fallback
+        if not img:
+            img = "/assets/fallback.jpg"
+
+        results.append({
+            "slug":             slug,
+            "title":            title,
+            "published":        date,
+            "category":         category,
+            "dek":              desc,
+            "meta_description": desc,
+            "card_summary":     desc,
+            "image_url":        img,
+            "image_credit":     "The Streamic",
+            "image_license":    "Site Asset",
+            "image_license_url": "",
+            "word_count":       900,
+            "generated_by":     "gpt_manual_editorial",
+            "is_editorial":     True,
+            "editorial":        True,
+            "source_url":       "",
+            "source_domain":    "The Streamic",
+            "quality_score":    90,
+            "body_html":        f"<p>{desc}</p>" if desc else "",
+        })
+
+    if results:
+        print(f"  ✓ manual_articles.json: {len(results)} articles loaded"
+              f"{f' ({skipped} skipped)' if skipped else ''}")
+    elif skipped:
+        print(f"  ℹ manual_articles.json: 0 loaded, {skipped} skipped")
+
+    return results
+
+
 def main():
     with open(ARTS_F,"r",encoding="utf-8") as f: arts = json.load(f)
     if not arts: raise SystemExit("No articles")
@@ -3060,6 +3163,14 @@ def main():
     arts = kept
     print(f"  After near-dup dedup: {len(arts)} unique articles "
           f"(removed {dropped_near_dup} near-duplicates)")
+
+    # ── Merge hand-authored articles from manual_articles.json ───────────
+    _existing_slugs = {a["slug"] for a in arts}
+    _manual = load_manual_articles(_existing_slugs)
+    if _manual:
+        arts = _manual + arts   # manual articles prepended → newest-first sort later
+        arts.sort(key=lambda a: a.get("published", ""), reverse=True)
+        print(f"  After manual merge: {len(arts)} total articles")
 
     # ── Ensure all articles have a slug ──────────────────────────────────
     def _slugify(title):
